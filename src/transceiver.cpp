@@ -1,13 +1,11 @@
 #include "transceiver.h"
-#include "mbed.h"
 #include <iostream>
 #include <bitset>
 
 uint8_t Transceiver::initialize(uint8_t channel, unsigned long long txAddress, unsigned long long rxAddress, uint8_t transferSize){
-    Serial pc(USBTX, USBRX);
     radio.powerUp();
     radio.setRfFrequency (2400 + channel);
-    radio.setTransferSize(2*transferSize);
+    radio.setTransferSize(transferSize);
     radio.setCrcWidth(16);
     radio.enableAutoAcknowledge(NRF24L01P_PIPE_P0);
     radio.setRxAddress(rxAddress);
@@ -63,4 +61,6 @@ void Transceiver::update(dataStruct * data){
     (*data).roll = (uint16_t)rxData[3] << 8 |rxData[2];
     (*data).pitch = (uint16_t)rxData[5] << 8 |rxData[4];
     (*data).yaw = (uint16_t)rxData[7] << 8 |rxData[6];
+    (*data).acroMode = ((bool)rxData[8] >> 1) & 0x01;
+    (*data).armMotor = (bool)rxData[8] & 0x01;
     }

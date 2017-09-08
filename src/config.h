@@ -10,12 +10,14 @@ struct dataStruct{
     uint16_t yaw;
     uint16_t batteryLevel;
     bool acroMode;
+    bool armMotor;
 
     dataStruct() :  throttle(0),
                     roll(0),
                     pitch(0),
                     yaw(0),
-                    acroMode(false)
+                    acroMode(false),
+                    armMotor(false)
                     {
                     }
     } ;
@@ -30,7 +32,7 @@ struct configStruct{
     configStruct() :    channel(101),
                         txAddress(0x00F0F0F0F0),
                         rxAddress(0x00F0F0F0F0),
-                        transferSize(8),
+                        transferSize(18),
                         tickerPeriod(1.0/500.0)
                         {
                         }

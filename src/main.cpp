@@ -3,6 +3,8 @@
 #include "controller.h"
 #include "transceiver.h"
 #include "config.h"
+#include <iostream>
+#include <bitset>
 
 Serial pc(USBTX, USBRX); // tx, rx
 DigitalOut led(LED1), led2(LED2), led3(LED3);
@@ -30,9 +32,8 @@ int main() {
 
     radio.update(&data);
     led=0;
-    while (data.throttle < 1000){radio.update(&data);}
+    while (!data.armMotor){radio.update(&data);}
     led=1;
-    while (data.throttle != 0) {radio.update(&data);}
     controller.initialize();
     ticker.attach(&tick,config.tickerPeriod);
 }
