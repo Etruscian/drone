@@ -1,5 +1,7 @@
 #include "transceiver.h"
 #include "mbed.h"
+#include <iostream>
+#include <bitset>
 
 uint8_t Transceiver::initialize(uint8_t channel, unsigned long long txAddress, unsigned long long rxAddress, uint8_t transferSize){
     Serial pc(USBTX, USBRX);
@@ -13,7 +15,10 @@ uint8_t Transceiver::initialize(uint8_t channel, unsigned long long txAddress, u
     uint8_t statRegister = radio.getStatusRegister();
     // check if status register is correct. If not, a complete reboot is needed
     if ((statRegister != 0x08) && (statRegister != 0x0e)){
-        pc.printf("%02x\r\n",statRegister);
+      while(1){
+        std::cout<<std::bitset<8>(statRegister)<<std::endl;
+        // pc.printf("%02x\r\n",statRegister);
+      }
         return 1;
     }
     radio.setReceiveMode();
@@ -53,8 +58,6 @@ void Transceiver::receive(int pipe,char* buffer,uint8_t length){
     }
 
 void Transceiver::update(dataStruct * data){
-    Serial pc(USBTX, USBRX); // tx, rx
-
     receive(NRF24L01P_PIPE_P0, rxData, transferSize);
     (*data).throttle = (uint16_t)rxData[1] << 8 |rxData[0];
     (*data).roll = (uint16_t)rxData[3] << 8 |rxData[2];
