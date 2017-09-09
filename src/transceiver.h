@@ -14,4 +14,5 @@ class Transceiver{
         void send();
         void receive(int pipe,char* buffer,uint8_t length);
         void update(dataStruct * data);
+        void setAcknowledgePayload(int pipe, dataStruct * data);
     };

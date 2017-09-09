@@ -6,6 +6,7 @@
 #include <bitset>
 
 DigitalOut led(LED1), led2(LED2), led3(LED3);
+AnalogIn battery(p20);
 dataStruct data;
 configStruct config;
 Transceiver radio(p5, p6, p7, p8, p9, p10);
@@ -17,6 +18,9 @@ uint8_t status;
  void tick(void){
     radio.update(&data);
     controller.update(&data);
+    data.batteryLevel = battery.read_u16();
+    // std::cout<<data.batteryLevel<<endl;
+    radio.setAcknowledgePayload(0,&data);
 }
 
 int main() {

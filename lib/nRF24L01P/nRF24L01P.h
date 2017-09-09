@@ -321,8 +321,7 @@ public:
      */
     int getRegister(int regAddress);
 
-    int flushTX();
-    int flushRX();
+    int writeAcknowledgePayload(int pipe, uint8_t * package, uint8_t length);
 
 private:
 

@@ -63,3 +63,10 @@ void Transceiver::update(dataStruct * data){
     (*data).acroMode = ((bool)rxData[8] >> 1) & 0x01;
     (*data).armMotor = (bool)rxData[8] & 0x01;
     }
+
+void Transceiver::setAcknowledgePayload(int pipe, dataStruct * data){
+        uint8_t package[4];
+        package[0] = (*data).batteryLevel & 0xFF;
+        package[1] = (*data).batteryLevel >> 8;
+        radio.writeAcknowledgePayload(pipe, &package[0], 2);
+    }

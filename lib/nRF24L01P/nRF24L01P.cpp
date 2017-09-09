@@ -545,6 +545,18 @@ void nRF24L01P::enableAutoAcknowledge(int pipe) {
 
     setRegister(_NRF24L01P_REG_EN_AA, enAA);
 
+    int dynp = getRegister(_NRF24L01P_REG_DYNPD);
+
+    dynp |= (1 << pipe - NRF24L01P_PIPE_P0);
+
+    setRegister(_NRF24L01P_REG_DYNPD, dynp);
+
+    int feature = getRegister(_NRF24L01P_REG_FEATURE);
+
+    feature |= 1 << 2 | 1 << 1;
+
+    setRegister(_NRF24L01P_REG_FEATURE,feature);
+
 }
 
 
@@ -834,7 +846,7 @@ bool nRF24L01P::readable(int pipe) {
 
 
 int nRF24L01P::write(int pipe, char *data, int count) {
-	Serial pc(USBTX, USBRX); // tx, rx
+	// Serial pc(USBTX, USBRX); // tx, rx
     // Note: the pipe number is ignored in a Transmit / write
 
     //
@@ -844,40 +856,40 @@ int nRF24L01P::write(int pipe, char *data, int count) {
     disable();
 
     if ( count <= 0 ) return 0;
-	pc.printf("1\r\n");
+	// pc.printf("1\r\n");
     if ( count > _NRF24L01P_TX_FIFO_SIZE ) count = _NRF24L01P_TX_FIFO_SIZE;
-		pc.printf("2\r\n");
+		// pc.printf("2\r\n");
     // Clear the Status bit
     setRegister(_NRF24L01P_REG_STATUS, _NRF24L01P_STATUS_TX_DS);
-		pc.printf("3\r\n");
+		// pc.printf("3\r\n");
     nCS_ = 0;
 
     int status = spi_.write(_NRF24L01P_SPI_CMD_W_TX_PYLD_NO_ACK);
-		pc.printf("4\r\n");
-		pc.printf("%02x\r\n",status);
+		// pc.printf("4\r\n");
+		// pc.printf("%02x\r\n",status);
     for ( int i = 0; i < count; i++ ) {
 
         spi_.write(*data++);
 
     }
-	pc.printf("5\r\n");
-	pc.printf("%02x\r\n",status);
+	// pc.printf("5\r\n");
+	// pc.printf("%02x\r\n",status);
     nCS_ = 1;
 
     int originalMode = mode;
     setTransmitMode();
-	pc.printf("6\r\n");
+	// pc.printf("6\r\n");
     enable();
     wait_us(_NRF24L01P_TIMING_Thce_us);
     disable();
-	pc.printf("7\r\n");
+	// pc.printf("7\r\n");
 //	wait_us(100);
     while ( !( getStatusRegister() & _NRF24L01P_STATUS_TX_DS ) ) {
 //		pc.printf("%02x\r\n",getStatusRegister());
 //        // Wait for the transfer to complete
 //
     }
-	pc.printf("8\r\n");
+	// pc.printf("8\r\n");
     // Clear the Status bit
     setRegister(_NRF24L01P_REG_STATUS, _NRF24L01P_STATUS_TX_DS);
 
@@ -1018,20 +1030,6 @@ int nRF24L01P::getRegister(int regAddress) {
 
 }
 
-int nRF24L01P::flushTX(void){
-    nCS_ = 0;
-    int status = spi_.write(_NRF24L01P_SPI_CMD_FLUSH_TX);
-    nCS_ = 1;
-    return status;
-}
-
-int nRF24L01P::flushRX(void){
-    nCS_ = 0;
-    int status = spi_.write(_NRF24L01P_SPI_CMD_FLUSH_RX);
-    nCS_ = 1;
-    return status;
-}
-
 int nRF24L01P::getStatusRegister(void) {
 
     nCS_ = 0;
@@ -1042,4 +1040,19 @@ int nRF24L01P::getStatusRegister(void) {
 
     return status;
 
+}
+
+int nRF24L01P::writeAcknowledgePayload(int pipe, uint8_t * package, uint8_t length){
+
+    nCS_ = 0;
+
+    int status = spi_.write(_NRF24L01P_SPI_CMD_W_ACK_PAYLOAD | (pipe & 0x07));
+
+    for (int i=0; i<length;i++){
+        spi_.write((*++package));
+    }
+
+    nCS_ = 1;
+
+    return status;
 }
