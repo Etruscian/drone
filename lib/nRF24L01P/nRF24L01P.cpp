@@ -184,8 +184,7 @@ nRF24L01P::nRF24L01P(PinName mosi,
 
     nCS_ = 1;
 
-    spi_.frequency(_NRF24L01P_SPI_MAX_DATA_RATE/5);     // 2Mbit, 1/5th the maximum transfer rate for the SPI bus
-    spi_.format(8,0);                                   // 8-bit, ClockPhase = 0, ClockPolarity = 0
+    spi_.frequency(_NRF24L01P_SPI_MAX_DATA_RATE/2);     // 2Mbit, 1/5th the maximum transfer rate for the SPI bus
 
     wait_us(_NRF24L01P_TIMING_Tundef2pd_us);    // Wait for Power-on reset
 
@@ -284,7 +283,7 @@ void nRF24L01P::enable(void) {
 
 void nRF24L01P::disable(void) {
 
-//    ce_ = 0;
+    ce_ = 0;
 
 }
 
@@ -991,7 +990,7 @@ void nRF24L01P::setRegister(int regAddress, int regData) {
 
     nCS_ = 0;
 
-    int status = spi_.write(cn);
+    spi_.write(cn);
 
     spi_.write(regData & 0xFF);
 
@@ -1009,7 +1008,7 @@ int nRF24L01P::getRegister(int regAddress) {
 
     nCS_ = 0;
 
-    int status = spi_.write(cn);
+    spi_.write(cn);
 
     int dn = spi_.write(_NRF24L01P_SPI_CMD_NOP);
 
@@ -1017,6 +1016,20 @@ int nRF24L01P::getRegister(int regAddress) {
 
     return dn;
 
+}
+
+int nRF24L01P::flushTX(void){
+    nCS_ = 0;
+    int status = spi_.write(_NRF24L01P_SPI_CMD_FLUSH_TX);
+    nCS_ = 1;
+    return status;
+}
+
+int nRF24L01P::flushRX(void){
+    nCS_ = 0;
+    int status = spi_.write(_NRF24L01P_SPI_CMD_FLUSH_RX);
+    nCS_ = 1;
+    return status;
 }
 
 int nRF24L01P::getStatusRegister(void) {

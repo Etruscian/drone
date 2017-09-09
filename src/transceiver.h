@@ -1,5 +1,5 @@
-#include "nRF24L01P.h"
-#include "config.h"
+#include <nRF24L01P.h>
+#include <config.h>
 
 class Transceiver{
     private:

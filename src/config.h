@@ -32,7 +32,7 @@ struct configStruct{
     configStruct() :    channel(101),
                         txAddress(0x00F0F0F0F0),
                         rxAddress(0x00F0F0F0F0),
-                        transferSize(18),
+                        transferSize(8),
                         tickerPeriod(1.0/500.0)
                         {
                         }

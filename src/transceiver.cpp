@@ -1,25 +1,24 @@
-#include "transceiver.h"
+#include <transceiver.h>
+#include <mbed.h>
 #include <iostream>
 #include <bitset>
 
 uint8_t Transceiver::initialize(uint8_t channel, unsigned long long txAddress, unsigned long long rxAddress, uint8_t transferSize){
     radio.powerUp();
+
+    // Check is status register is correct, if not, a full reboot is needed :(
+    uint8_t statRegister = radio.getStatusRegister();
+    if ((statRegister != 0x08) && (statRegister != 0x0e)){
+        return 1;
+      }
     radio.setRfFrequency (2400 + channel);
     radio.setTransferSize(transferSize);
     radio.setCrcWidth(16);
     radio.enableAutoAcknowledge(NRF24L01P_PIPE_P0);
     radio.setRxAddress(rxAddress);
     radio.setTxAddress(txAddress);
-    uint8_t statRegister = radio.getStatusRegister();
-    // check if status register is correct. If not, a complete reboot is needed
-    if ((statRegister != 0x08) && (statRegister != 0x0e)){
-      while(1){
-        std::cout<<std::bitset<8>(statRegister)<<std::endl;
-        // pc.printf("%02x\r\n",statRegister);
-      }
-        return 1;
-    }
     radio.setReceiveMode();
+    
     radio.enable();
 
     this->transferSize = transferSize;

@@ -321,6 +321,9 @@ public:
      */
     int getRegister(int regAddress);
 
+    int flushTX();
+    int flushRX();
+
 private:
 
 
