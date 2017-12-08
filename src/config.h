@@ -3,20 +3,36 @@
 
 #include <stdint.h>
 
-struct dataStruct{
+struct controllerStruct{
     uint16_t throttle;
     uint16_t roll;
     uint16_t pitch;
     uint16_t yaw;
+
+    controllerStruct() : throttle(0),
+                         roll(0),
+                         pitch(0),
+                         yaw(0)
+                         {}
+};
+
+struct imuStruct {
+    uint16_t roll;
+    uint16_t pitch;
+    uint16_t yaw;
+    int16_t rollVelocity;
+    int16_t pitchVelocity;
+    int16_t yawVelocity;
+};
+
+struct dataStruct{
+    controllerStruct controller;
+    imuStruct imu;
     uint16_t batteryLevel;
     bool acroMode;
     bool armMotor;
 
-    dataStruct() :  throttle(0),
-                    roll(0),
-                    pitch(0),
-                    yaw(0),
-                    acroMode(false),
+    dataStruct() :  acroMode(false),
                     armMotor(false)
                     {
                     }

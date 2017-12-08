@@ -8,9 +8,9 @@ void Controller::initialize(void){
 }
 
 void Controller::update(dataStruct * data){
-    if ((*data).armMotor){
-    uint8_t value = (uint8_t)(125.0 + (*data).throttle/1023.0*125.0);// - (*pitch)/90.0*45.0;
+    // if ((*data).armMotor){
+    uint8_t value = (uint8_t)(125.0 + (*data).controller.throttle/1023.0*125.0);// - (*pitch)/90.0*45.0;
     this->escController1.update(value);
 //    this->escController4.update(value);
-    }
+    // }
 }

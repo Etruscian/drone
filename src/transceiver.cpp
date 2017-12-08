@@ -9,6 +9,7 @@ uint8_t Transceiver::initialize(uint8_t channel, unsigned long long txAddress, u
     // Check is status register is correct, if not, a full reboot is needed :(
     uint8_t statRegister = radio.getStatusRegister();
     if ((statRegister != 0x08) && (statRegister != 0x0e)){
+        std::cout << bitset<8>(statRegister) << std::endl;
         return 1;
       }
     radio.setRfFrequency (2400 + channel);
@@ -56,10 +57,10 @@ void Transceiver::receive(int pipe,char* buffer,uint8_t length){
 
 void Transceiver::update(dataStruct * data){
     receive(NRF24L01P_PIPE_P0, rxData, transferSize);
-    (*data).throttle = (uint16_t)rxData[1] << 8 |rxData[0];
-    (*data).roll = (uint16_t)rxData[3] << 8 |rxData[2];
-    (*data).pitch = (uint16_t)rxData[5] << 8 |rxData[4];
-    (*data).yaw = (uint16_t)rxData[7] << 8 |rxData[6];
+    (*data).controller.throttle = (uint16_t)rxData[1] << 8 |rxData[0];
+    (*data).controller.roll = (uint16_t)rxData[3] << 8 |rxData[2];
+    (*data).controller.pitch = (uint16_t)rxData[5] << 8 |rxData[4];
+    (*data).controller.yaw = (uint16_t)rxData[7] << 8 |rxData[6];
     (*data).acroMode = ((bool)rxData[8] >> 1) & 0x01;
     (*data).armMotor = (bool)rxData[8] & 0x01;
     }

@@ -15,28 +15,37 @@ Controller controller(p21, p22, p23, p24);
 
 uint8_t status;
 
- void tick(void){
+void tick(void){
     radio.update(&data);
     controller.update(&data);
     data.batteryLevel = battery.read_u16();
-    // std::cout<<data.batteryLevel<<endl;
     radio.setAcknowledgePayload(0,&data);
 }
 
 int main() {
+    wait(5);
+    led=0;
     status = radio.initialize(config.channel,config.rxAddress, config.txAddress,config.transferSize);
     if (status) {
         led2 = 1;
         return 0;
     }
 
-    led=0;
+    led=1;
 
-    while (!data.armMotor){
+    while (!data.controller.throttle){
         radio.update(&data);
+        std::cout << (int)data.controller.throttle << std::endl;
     }
 
-    led=1;
+    led2=1;
+
+    while (data.controller.throttle < 1000){
+        radio.update(&data);
+        std::cout << (int)data.controller.throttle << std::endl;
+    }
+    led2=0;
+    led3=1;
 
     controller.initialize();
 

@@ -165,6 +165,11 @@ void IMU::update(dataStruct * data){
         (*data).pitch = asin(2*(this->qw*this->qy-this->qz*this->qx))/3.14159265359*180;
         (*data).yaw = atan2(2*(this->qw*this->qz+this->qx*this->qy),1-2*(this->qy*this->qy+this->qz*this->qz))/3.14159265359*180;
     }
+    else {
+        (*data).rollVelocity = velocities[0];
+        (*data).pitchVelocity = velocities[1];
+        (*data).yawVelocity = velocities[2];
+    }
 }
 
 void IMU::estimator(float * roll, float * pitch){
