@@ -1,6 +1,7 @@
 #include "mbed.h"
 #include "controller.h"
 #include "transceiver.h"
+#include "IMU.h"
 #include "config.h"
 #include <iostream>
 #include <bitset>
@@ -12,6 +13,7 @@ configStruct config;
 Transceiver radio(p5, p6, p7, p8, p9, p10);
 Ticker ticker;
 Controller controller(p21, p22, p23, p24);
+IMU imu;
 
 uint8_t status;
 
@@ -30,6 +32,8 @@ int main() {
         led2 = 1;
         return 0;
     }
+
+    imu.initialize();
 
     led=1;
 

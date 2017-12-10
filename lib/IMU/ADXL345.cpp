@@ -46,7 +46,7 @@ int ADXL345::initialize(uint16_t gRange, float xFilter, float yFilter, float zFi
 }
 
 uint8_t ADXL345::convertGRange(uint16_t gRange){
-    uint8_t value;
+    uint8_t value = 0x00;
     switch (gRange) {
         case 2:
             value = 0x00;
@@ -66,77 +66,77 @@ uint8_t ADXL345::convertGRange(uint16_t gRange){
 }
 
 int ADXL345::selfTest(void){
-    this->buffer[0] = this->REG_DATA_FORMAT;
-    this->buffer[1] = this->CMD_DATA_FORMAT_FULL_RES_16G;
+    // this->buffer[0] = this->REG_DATA_FORMAT;
+    // this->buffer[1] = this->CMD_DATA_FORMAT_FULL_RES_16G;
 
-    int status = this->i2c.write(this->ADXL345_ADDRESS,this->buffer,2);
-    if (status != 0){
-        return 4;
-    }
+    // int status = this->i2c.write(this->ADXL345_ADDRESS,this->buffer,2);
+    // if (status != 0){
+    //     return 4;
+    // }
 
-    char bufferOff[20][6];
-    for (int i=0;i<20;i++){
-        this->i2c.read(this->ADXL345_ADDRESS,bufferOff[i],6);
-    }
+    // char bufferOff[20][6];
+    // for (int i=0;i<20;i++){
+    //     this->i2c.read(this->ADXL345_ADDRESS,bufferOff[i],6);
+    // }
 
-    this->buffer[0] = this->REG_DATA_FORMAT;
-    this->buffer[1] = this->CMD_DATA_FORMAT_FULL_RES_16G + CMD_SELF_TEST;
+    // this->buffer[0] = this->REG_DATA_FORMAT;
+    // this->buffer[1] = this->CMD_DATA_FORMAT_FULL_RES_16G + CMD_SELF_TEST;
 
-    status = this->i2c.write(this->ADXL345_ADDRESS,this->buffer,2);
-    if (status != 0){
-        return 5;
-    }
+    // status = this->i2c.write(this->ADXL345_ADDRESS,this->buffer,2);
+    // if (status != 0){
+    //     return 5;
+    // }
 
-    wait(0.2);
+    // wait(0.2);
 
-    char bufferOn[20][6];
-    for (int i=0;i<20;i++){
-        this->i2c.read(this->ADXL345_ADDRESS,bufferOn[i],6);
-    }
+    // char bufferOn[20][6];
+    // for (int i=0;i<20;i++){
+    //     this->i2c.read(this->ADXL345_ADDRESS,bufferOn[i],6);
+    // }
 
-    float totalOff[3];
-    float averageOff[3];
-    for (int i=0;i<20;i++){
-        totalOff[0] += ((float)(bufferOff[i][0])*3.9/1000.0);
-        totalOff[1] += ((float)(bufferOff[i][2])*3.9/1000.0);
-        totalOff[2] += ((float)(bufferOff[i][4])*3.9/1000.0);
-    }
+    // float totalOff[3];
+    // float averageOff[3];
+    // for (int i=0;i<20;i++){
+    //     totalOff[0] += ((float)(bufferOff[i][0])*3.9/1000.0);
+    //     totalOff[1] += ((float)(bufferOff[i][2])*3.9/1000.0);
+    //     totalOff[2] += ((float)(bufferOff[i][4])*3.9/1000.0);
+    // }
 
-    averageOff[0] = totalOff[0]/20;
-    averageOff[1] = totalOff[1]/20;
-    averageOff[2] = totalOff[2]/20;
+    // averageOff[0] = totalOff[0]/20;
+    // averageOff[1] = totalOff[1]/20;
+    // averageOff[2] = totalOff[2]/20;
 
-    float totalOn[3];
-    float averageOn[3];
-    for (int i=0;i<20;i++){
-        totalOn[0] += ((float)((int16_t)(bufferOn[i][0]))*32.0/1024.0);
-        totalOn[1] += ((float)((int16_t)(bufferOn[i][2]))*32.0/1024.0);
-        totalOn[2] += ((float)((int16_t)(bufferOn[i][4]))*32.0/1024.0);
-    }
-    averageOn[0] = totalOn[0]/20;
-    averageOn[1] = totalOn[1]/20;
-    averageOn[2] = totalOn[2]/20;
-    Serial pc(USBTX, USBRX); // tx, rx
-    if (averageOn[0]-averageOff[0] < 6.0 ){
-        pc.printf("X: %.2f\r\n",averageOn[0]-averageOff[0]);
-        return 6;
-    }
-    if (averageOn[1]-averageOff[1] > -6.0 ){
-        pc.printf("Y: %.2f\r\n",averageOn[1]-averageOff[1]);
-        return 7;
-    }
-    if (averageOn[2]-averageOff[2] < 10.0 ){
-        pc.printf("Z: %.2f\r\n",averageOn[2]-averageOff[2]);
-        return 8;
-    }
+    // float totalOn[3];
+    // float averageOn[3];
+    // for (int i=0;i<20;i++){
+    //     totalOn[0] += ((float)((int16_t)(bufferOn[i][0]))*32.0/1024.0);
+    //     totalOn[1] += ((float)((int16_t)(bufferOn[i][2]))*32.0/1024.0);
+    //     totalOn[2] += ((float)((int16_t)(bufferOn[i][4]))*32.0/1024.0);
+    // }
+    // averageOn[0] = totalOn[0]/20;
+    // averageOn[1] = totalOn[1]/20;
+    // averageOn[2] = totalOn[2]/20;
+    // Serial pc(USBTX, USBRX); // tx, rx
+    // if (averageOn[0]-averageOff[0] < 6.0 ){
+    //     pc.printf("X: %.2f\r\n",averageOn[0]-averageOff[0]);
+    //     return 6;
+    // }
+    // if (averageOn[1]-averageOff[1] > -6.0 ){
+    //     pc.printf("Y: %.2f\r\n",averageOn[1]-averageOff[1]);
+    //     return 7;
+    // }
+    // if (averageOn[2]-averageOff[2] < 10.0 ){
+    //     pc.printf("Z: %.2f\r\n",averageOn[2]-averageOff[2]);
+    //     return 8;
+    // }
 
-    this->buffer[0] = this->REG_DATA_FORMAT;
-    this->buffer[1] = this->CMD_DATA_FORMAT_FULL_RES_16G;
+    // this->buffer[0] = this->REG_DATA_FORMAT;
+    // this->buffer[1] = this->CMD_DATA_FORMAT_FULL_RES_16G;
 
-    status = this->i2c.write(this->ADXL345_ADDRESS,this->buffer,2);
-    if (status != 0){
-        return 9;
-    }
+    // status = this->i2c.write(this->ADXL345_ADDRESS,this->buffer,2);
+    // if (status != 0){
+    //     return 9;
+    // }
 
     return 0;
 }

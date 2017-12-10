@@ -1,3 +1,6 @@
+#ifndef ESCCONTROLLER_H
+#define ESCCONTROLLER_H
+
 #include "mbed.h"
 
 class ESCController{
@@ -10,3 +13,5 @@ class ESCController{
     void update(uint8_t);
 
 };
+
+#endif

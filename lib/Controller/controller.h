@@ -1,3 +1,6 @@
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
+
 #include <mbed.h>
 #include "ESCController.h"
 #include "config.h"
@@ -14,3 +17,5 @@ class Controller{
         void initialize(void);
         void update(dataStruct * data);
 };
+
+#endif
