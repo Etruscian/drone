@@ -23,7 +23,7 @@ void tick(void){
 }
 
 int main() {
-    wait(5);
+    // wait(5);
     led=0;
     status = radio.initialize(config.channel,config.rxAddress, config.txAddress,config.transferSize);
     if (status) {
