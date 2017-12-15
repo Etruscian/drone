@@ -8,6 +8,7 @@ struct remoteStruct{
     int16_t roll;
     int16_t pitch;
     int16_t yaw;
+    uint16_t missedPackets;
 
     remoteStruct() : throttle(0),
                      roll(0),
