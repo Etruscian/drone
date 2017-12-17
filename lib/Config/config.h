@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-struct remoteStruct{
+struct remoteStruct
+{
     uint16_t throttle;
     int16_t roll;
     int16_t pitch;
@@ -14,10 +15,12 @@ struct remoteStruct{
                      roll(0),
                      pitch(0),
                      yaw(0)
-                     {}
+    {
+    }
 };
 
-struct imuStruct {
+struct imuStruct
+{
     int16_t roll;
     int16_t pitch;
     int16_t yaw;
@@ -26,20 +29,22 @@ struct imuStruct {
     int16_t yawVelocity;
 };
 
-struct dataStruct{
+struct dataStruct
+{
     remoteStruct remote;
     imuStruct imu;
     uint16_t batteryLevel;
     bool acroMode;
     bool armMotor;
 
-    dataStruct() :  acroMode(false),
-                    armMotor(false)
-                    {
-                    }
-} ;
+    dataStruct() : acroMode(false),
+                   armMotor(false)
+    {
+    }
+};
 
-struct radioConfigStruct{
+struct radioConfigStruct
+{
     uint8_t channel;
     uint64_t txAddress;
     uint64_t rxAddress;
@@ -49,38 +54,40 @@ struct radioConfigStruct{
                           txAddress(0x00F0F0F0F0),
                           rxAddress(0x00F0F0F0F0),
                           transferSize(8)
-                          {
-                          }
-
+    {
+    }
 };
 
-struct acroModeStruct{
+struct acroModeStruct
+{
     float Kp[4][3], Ki[4][3], Kd[4][3];
 };
 
-struct stabilizingModeStruct{
+struct stabilizingModeStruct
+{
     float Kp[4][3], Ki[4][3], Kd[4][3];
 };
 
-struct controllerConfigStruct{
+struct controllerConfigStruct
+{
     acroModeStruct acroModeConfig;
     stabilizingModeStruct stabilizingModeConfig;
     int8_t signs[4][3];
 
-    controllerConfigStruct() : signs({{1, 1, 1},{-1,1,-1},{1,-1,-1},{-1,-1,1}})
-                               {}
+    controllerConfigStruct() : signs({{1, 1, 1}, {-1, 1, -1}, {1, -1, -1}, {-1, -1, 1}})
+    {
+    }
 };
-    
 
-
-struct configStruct{
+struct configStruct
+{
     radioConfigStruct radioConfig;
     controllerConfigStruct controllerConfig;
     float tickerPeriod;
 
-    configStruct() : tickerPeriod(1.0/500.0)
-                    {
-                    }
+    configStruct() : tickerPeriod(1.0 / 500.0)
+    {
+    }
 };
-    
+
 #endif

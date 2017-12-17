@@ -17,7 +17,8 @@ IMU imu;
 
 uint8_t status;
 
-void tick(void){
+void tick(void)
+{
     radio.update();
     // imu.update();
     controller.update();
@@ -25,86 +26,95 @@ void tick(void){
     radio.setAcknowledgePayload(0);
 }
 
-int main() {
+int main()
+{
     // wait(5);
-    led=0;
-    led2=0;
-    led3=0;
-    led4=0;
+    led = 0;
+    led2 = 0;
+    led3 = 0;
+    led4 = 0;
 
     status = radio.initialize(config, &data);
-    if (status) {
-        led=0;
-        led2=1;
-        led3=0;
-        led4=1;
+    if (status)
+    {
+        led = 0;
+        led2 = 1;
+        led3 = 0;
+        led4 = 1;
         return 0;
     }
-    led=1;
+    led = 1;
     // imu.initialize(&data);
-    
-    led2=1;
+
+    led2 = 1;
 
     radio.update();
 
-    while (data.remote.throttle > 25){
+    while (data.remote.throttle > 25)
+    {
         radio.update();
-        wait_ms(100);
-        if (data.remote.missedPackets>200){
-            led=1;
-            led2=0;
-            led3=0;
-            led4=1;
-        } else {
-            led=0;
-    led2=0;
-    led3=0;
-    led4=0;
+        wait_ms(1);
+        if (data.remote.missedPackets > 200)
+        {
+            led = !led;
         }
+        else
+        {
+            led = 1;
+            led2 = 1;
+            led3 = 0;
+            led4 = 0;
+        }
+        radio.setAcknowledgePayload(0);
         // std::cout << data.remote.throttle << std::endl;
     }
 
-    led3=1;
-    
-    while (data.remote.throttle < 1000){
+    led3 = 1;
+
+    while (data.remote.throttle < 1000)
+    {
         radio.update();
-        wait_ms(100);
-    //     if (data.remote.missedPackets>9){
-    //         led=1;
-    //         led2=0;
-    //         led3=0;
-    //         led4=1;
-    //     } else {
-    //         led=0;
-    // led2=0;
-    // led3=0;
-    // led4=0;
-    //     }
+        wait_ms(1);
+            if (data.remote.missedPackets>100){
+                led = !led;
+            } else if (data.remote.missedPackets == 0) {
+                led=1;
+                led2=1;
+                led3=1;
+                led4=0;
+            }
+            radio.setAcknowledgePayload(0);
     }
 
-    led4=1;
+    led4 = 1;
 
-    while (data.remote.throttle > 25){
+    while (data.remote.throttle > 25)
+    {
         radio.update();
-        wait_ms(100);
-        if (data.remote.missedPackets>9){
-            led=1;
-            led2=0;
-            led3=0;
-            led4=1;
-        } else {
-            led=0;
-    led2=0;
-    led3=0;
-    led4=0;
+        wait_ms(1);
+        if (data.remote.missedPackets > 9)
+        {
+            led = 1;
+            led2 = 0;
+            led3 = 0;
+            led4 = 1;
         }
+        else
+        {
+                led=1;
+                led2=1;
+                led3=1;
+                led4=1;
+        }
+        radio.setAcknowledgePayload(0);
     }
 
-    led=0;
-    led2=0;
-    led3=0;
-    led4=0;
+    led = 0;
+    led2 = 0;
+    led3 = 0;
+    led4 = 0;
+
     controller.initialize(&data, &config.controllerConfig);
 
-    ticker.attach(&tick,config.tickerPeriod);
+    ticker.attach(&tick, config.tickerPeriod);
 }

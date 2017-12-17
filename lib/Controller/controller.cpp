@@ -1,6 +1,7 @@
 #include "controller.h"
 
-void Controller::initialize(dataStruct * data, controllerConfigStruct * controllerConfig){
+void Controller::initialize(dataStruct *data, controllerConfigStruct *controllerConfig)
+{
     escController[0].initialize();
     escController[1].initialize();
     escController[2].initialize();
@@ -14,7 +15,8 @@ void Controller::initialize(dataStruct * data, controllerConfigStruct * controll
     setpoint[3] = 0;
 }
 
-void Controller::update(void){
+void Controller::update(void)
+{
     // if ((*dataPtr).acroMode){
     //     for (int i=0;i<=3;i++){
     //         float rollVelocityError = (*dataPtr).remote.roll - (*dataPtr).imu.rollVelocity;
@@ -34,11 +36,11 @@ void Controller::update(void){
     //     escController[i].update(setpoint[i]);
     // }
 
-    uint8_t value = (uint8_t)((*dataPtr).remote.throttle/1023.0*125.0);// - (*pitch)/90.0*45.0;
+    uint8_t value = (uint8_t)((*dataPtr).remote.throttle / 1023.0 * 125.0); // - (*pitch)/90.0*45.0;
     escController[0].update(value);
     escController[1].update(value);
     escController[2].update(value);
     escController[3].update(value);
-//    escController4.update(value);
+    //    escController4.update(value);
     // }
 }
