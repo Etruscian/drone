@@ -4,7 +4,7 @@
 #include "ADXL345.h"
 #include "ITG3200.h"
 #include "HMC5883L.h"
-#include "config.h"
+#include "config.hpp"
 
 class IMU
 {
@@ -23,7 +23,7 @@ class IMU
     void calculateQuaternions(void);
 
   public:
-    int initialize(dataStruct *data);
+    int initialize(configStruct config, dataStruct *data);
     void calibrate(void);
     void update(void);
     void estimator(float *roll, float *pitch);

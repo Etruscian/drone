@@ -3,7 +3,7 @@
 
 #include <mbed.h>
 #include "ESCController.h"
-#include "config.h"
+#include "config.hpp"
 
 class Controller
 {

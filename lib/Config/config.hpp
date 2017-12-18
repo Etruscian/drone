@@ -37,7 +37,7 @@ struct dataStruct
     bool acroMode;
     bool armMotor;
 
-    dataStruct() : acroMode(false),
+    dataStruct() : acroMode(true),
                    armMotor(false)
     {
     }
@@ -74,15 +74,46 @@ struct controllerConfigStruct
     stabilizingModeStruct stabilizingModeConfig;
     int8_t signs[4][3];
 
-    controllerConfigStruct() : signs({{1, 1, 1}, {-1, 1, -1}, {1, -1, -1}, {-1, -1, 1}})
+    controllerConfigStruct() : signs{{1, 1, 1}, {-1, 1, -1}, {1, -1, -1}, {-1, -1, 1}}
     {
     }
+};
+
+struct ITG3200ConfigStruct
+    {
+        float a = 0.01;
+        float b = 0.01;
+        float c = 0.01;
+    };
+
+struct HMC5883LConfigStruct
+    {
+        float a = 0.001;
+        float b = 0.001;
+        float c = 0.001;
+    };
+
+struct AXDL345ConfigStruct
+    {
+        float a = 0.001;
+        float b = 0.001;
+        float c = 0.001;
+    };
+
+struct imuConfigStruct
+{
+    AXDL345ConfigStruct adxl345;
+
+    HMC5883LConfigStruct hmc5883l;
+
+    ITG3200ConfigStruct itg3200;
 };
 
 struct configStruct
 {
     radioConfigStruct radioConfig;
     controllerConfigStruct controllerConfig;
+    imuConfigStruct imuconfig;
     float tickerPeriod;
 
     configStruct() : tickerPeriod(1.0 / 500.0)

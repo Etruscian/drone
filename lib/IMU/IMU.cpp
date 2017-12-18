@@ -1,4 +1,5 @@
 #include "IMU.h"
+#include <iostream>
 
 /*
 Initializes the devices on the IMU. Returns an error code if an error occurs.
@@ -11,10 +12,10 @@ Finally, the magnetometer is initialized.
 @return         status. 0 if success, error code otherwise
 
 */
-int IMU::initialize(dataStruct * data){
+int IMU::initialize(configStruct config, dataStruct * data){
     int status;
     // Initialize the GYRO.
-    status = itg3200.initialize();
+    status = itg3200.initialize(config.imuconfig.itg3200);
     if (status)
         return status;
 
