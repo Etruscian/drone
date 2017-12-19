@@ -1,8 +1,9 @@
 #include "mbed.h"
 #include "config.hpp"
+#include "iniparser.h"
 #include "transceiver.h"
 #include "IMU.h"
-#include "controller.h"
+#include "controller.hpp"
 #include <iostream>
 #include <bitset>
 
@@ -17,110 +18,162 @@ IMU imu;
 
 uint8_t status;
 
-void tick(void)
-{
-    // radio.update();
-    imu.update();
-    std::cout << data.imu.rollVelocity << std::endl;
-    // controller.update();
-    // data.batteryLevel = battery.read_u16();
-    // radio.setAcknowledgePayload(0);
+void loadConfig(void){
+    LocalFileSystem local("local");
+    dictionary *dir = iniparser_load("/local/config.ini");
+
+    // Read config for radio
+    config.radioConfig.channel = iniparser_getint(dir, "radio:channel",0);
+    config.radioConfig.txAddress = iniparser_getlongint(dir, "radio:txaddress",0);
+    config.radioConfig.rxAddress = iniparser_getlongint(dir, "radio:rxaddress",0);
+    config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",0);
+
+    // Read config for ACRO mode
+    char * keysAcro[36];
+    const char ** keysAcroPtr = (const char **) &keysAcro;
+    keysAcroPtr = iniparser_getseckeys(dir, "acromode", keysAcroPtr);
+    for (int i = 0; i<=3; i++){
+        for (int j = 0; j<=2; j++){
+            config.controllerConfig.acroModeConfig.Kp[i][j] = iniparser_getdouble(dir, (keysAcro[3*i+j]),0);
+        }
+    }
+
+    // Read config for stabilizing mode
+    char * keysStabilizing[36];
+    const char ** keysStabilizingPtr = (const char **) &keysStabilizing;
+    keysStabilizingPtr = iniparser_getseckeys(dir, "stabilizingmode", keysStabilizingPtr);
+    for (int i = 0; i<=3; i++){
+        for (int j = 0; j<=2; j++){
+            config.controllerConfig.stabilizingModeConfig.Kp[i][j] = iniparser_getdouble(dir, (keysStabilizing[3*i+j]),0);
+        }
+    }
+
+    // Read config for motor direction compensation
+    char * keysSigns[12];
+    const char ** keysSignsPtr = (const char **) &keysSigns;
+    keysSignsPtr = iniparser_getseckeys(dir, "stabilizingmode", keysSignsPtr);
+    for (int i = 0; i<=3; i++){
+        for (int j = 0; j<=2; j++){
+            config.controllerConfig.signs[i][j] = iniparser_getdouble(dir, (keysSigns[3*i+j]),0);
+        }
+    }
+
+    // Reading filter values
+    config.imuconfig.itg3200.a = iniparser_getdouble(dir, "itg3200:a",0);
+    config.imuconfig.itg3200.b = iniparser_getdouble(dir, "itg3200:b",0);
+    config.imuconfig.itg3200.c = iniparser_getdouble(dir, "itg3200:c",0);
+
+    config.imuconfig.hmc5883l.a = iniparser_getdouble(dir, "hmc5883l:a",0);
+    config.imuconfig.hmc5883l.b = iniparser_getdouble(dir, "hmc5883l:b",0);
+    config.imuconfig.hmc5883l.c = iniparser_getdouble(dir, "hmc5883l:c",0);
+
+    config.imuconfig.adxl345.a = iniparser_getdouble(dir, "adxl345:a",0);
+    config.imuconfig.adxl345.b = iniparser_getdouble(dir, "adxl345:b",0);
+    config.imuconfig.adxl345.c = iniparser_getdouble(dir, "adxl345:c",0);
+
+    config.tickerPeriod = (float) iniparser_getdouble(dir, "misc:tickerperiod",0);
+    iniparser_freedict(dir);
 }
 
-void loadConfig(void){
-    FILE *set = fopen('/local/config.txt', "r");
-    fscanf(set,"%s %d", )
+void tick(void)
+{
+    radio.update();
+    // imu.update();
+    controller.update();
+    data.batteryLevel = battery.read_u16();
+    radio.setAcknowledgePayload(0);
 }
 
 int main()
 {
-    // wait(5);
-    // led = 0;
-    // led2 = 0;
-    // led3 = 0;
-    // led4 = 0;
+    loadConfig();
+    wait(5);
+    led = 0;
+    led2 = 0;
+    led3 = 0;
+    led4 = 0;
 
-    // status = radio.initialize(config, &data);
-    // if (status)
-    // {
-    //     led = 0;
-    //     led2 = 1;
-    //     led3 = 0;
-    //     led4 = 1;
-    //     return 0;
-    // }
-    // led = 1;
-    imu.initialize(config, &data);
+    status = radio.initialize(config, &data);
+    if (status)
+    {
+        led = 0;
+        led2 = 1;
+        led3 = 0;
+        led4 = 1;
+        return 0;
+    }
+    led = 1;
+    // imu.initialize(config, &data);
 
     led2 = 1;
 
-    // radio.update();
+    radio.update();
 
-    // while (data.remote.throttle > 25)
-    // {
-    //     radio.update();
-    //     wait_ms(1);
-    //     if (data.remote.missedPackets > 200)
-    //     {
-    //         led = !led;
-    //     }
-    //     else
-    //     {
-    //         led = 1;
-    //         led2 = 1;
-    //         led3 = 0;
-    //         led4 = 0;
-    //     }
-    //     radio.setAcknowledgePayload(0);
-    //     // std::cout << data.remote.throttle << std::endl;
-    // }
+    while (data.remote.throttle > 25)
+    {
+        radio.update();
+        wait_ms(1);
+        if (data.remote.missedPackets > 200)
+        {
+            led = !led;
+        }
+        else
+        {
+            led = 1;
+            led2 = 1;
+            led3 = 0;
+            led4 = 0;
+        }
+        radio.setAcknowledgePayload(0);
+        // std::cout << data.remote.throttle << std::endl;
+    }
 
-    // led3 = 1;
+    led3 = 1;
 
-    // while (data.remote.throttle < 1000)
-    // {
-    //     radio.update();
-    //     wait_ms(1);
-    //         if (data.remote.missedPackets>100){
-    //             led = !led;
-    //         } else if (data.remote.missedPackets == 0) {
-    //             led=1;
-    //             led2=1;
-    //             led3=1;
-    //             led4=0;
-    //         }
-    //         radio.setAcknowledgePayload(0);
-    // }
+    while (data.remote.throttle < 1000)
+    {
+        radio.update();
+        wait_ms(1);
+            if (data.remote.missedPackets>100){
+                led = !led;
+            } else if (data.remote.missedPackets == 0) {
+                led=1;
+                led2=1;
+                led3=1;
+                led4=0;
+            }
+            radio.setAcknowledgePayload(0);
+    }
 
-    // led4 = 1;
+    led4 = 1;
 
-    // while (data.remote.throttle > 25)
-    // {
-    //     radio.update();
-    //     wait_ms(1);
-    //     if (data.remote.missedPackets > 9)
-    //     {
-    //         led = 1;
-    //         led2 = 0;
-    //         led3 = 0;
-    //         led4 = 1;
-    //     }
-    //     else
-    //     {
-    //             led=1;
-    //             led2=1;
-    //             led3=1;
-    //             led4=1;
-    //     }
-    //     radio.setAcknowledgePayload(0);
-    // }
+    while (data.remote.throttle > 25)
+    {
+        radio.update();
+        wait_ms(1);
+        if (data.remote.missedPackets > 9)
+        {
+            led = 1;
+            led2 = 0;
+            led3 = 0;
+            led4 = 1;
+        }
+        else
+        {
+                led=1;
+                led2=1;
+                led3=1;
+                led4=1;
+        }
+        radio.setAcknowledgePayload(0);
+    }
 
-    // led = 0;
-    // led2 = 0;
-    // led3 = 0;
-    // led4 = 0;
+    led = 0;
+    led2 = 0;
+    led3 = 0;
+    led4 = 0;
 
-    // controller.initialize(&data, &config.controllerConfig);
+    controller.initialize(&data, &config.controllerConfig);
 
     ticker.attach(&tick, config.tickerPeriod);
 }

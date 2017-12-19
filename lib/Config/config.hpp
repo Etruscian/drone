@@ -49,13 +49,6 @@ struct radioConfigStruct
     uint64_t txAddress;
     uint64_t rxAddress;
     uint8_t transferSize;
-
-    radioConfigStruct() : channel(101),
-                          txAddress(0x00F0F0F0F0),
-                          rxAddress(0x00F0F0F0F0),
-                          transferSize(8)
-    {
-    }
 };
 
 struct acroModeStruct
@@ -73,36 +66,32 @@ struct controllerConfigStruct
     acroModeStruct acroModeConfig;
     stabilizingModeStruct stabilizingModeConfig;
     int8_t signs[4][3];
-
-    controllerConfigStruct() : signs{{1, 1, 1}, {-1, 1, -1}, {1, -1, -1}, {-1, -1, 1}}
-    {
-    }
 };
 
 struct ITG3200ConfigStruct
     {
-        float a = 0.01;
-        float b = 0.01;
-        float c = 0.01;
+        float a;
+        float b;
+        float c;
     };
 
 struct HMC5883LConfigStruct
     {
-        float a = 0.001;
-        float b = 0.001;
-        float c = 0.001;
+        float a;
+        float b;
+        float c;
     };
 
-struct AXDL345ConfigStruct
+struct ADXL345ConfigStruct
     {
-        float a = 0.001;
-        float b = 0.001;
-        float c = 0.001;
+        float a;
+        float b;
+        float c;
     };
 
 struct imuConfigStruct
 {
-    AXDL345ConfigStruct adxl345;
+    ADXL345ConfigStruct adxl345;
 
     HMC5883LConfigStruct hmc5883l;
 
@@ -115,10 +104,6 @@ struct configStruct
     controllerConfigStruct controllerConfig;
     imuConfigStruct imuconfig;
     float tickerPeriod;
-
-    configStruct() : tickerPeriod(1.0 / 500.0)
-    {
-    }
 };
 
 #endif
