@@ -2,7 +2,7 @@
 #define CONTROLLER_H
 
 #include <mbed.h>
-#include "ESCController.h"
+#include "ESCController.hpp"
 #include "config.hpp"
 
 class Controller

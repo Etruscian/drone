@@ -1,5 +1,5 @@
-#include "mbed.h"
-#include "config.hpp"
+#include <mbed.h>
+#include <config.hpp>
 #include "iniparser.h"
 #include "transceiver.h"
 #include "IMU.h"
@@ -15,6 +15,8 @@ Transceiver radio(p5, p6, p7, p8, p9, p10);
 Ticker ticker;
 Controller controller(p21, p22, p23, p24);
 IMU imu;
+
+Timer timer;
 
 uint8_t status;
 
@@ -51,7 +53,7 @@ void loadConfig(void){
     // Read config for motor direction compensation
     char * keysSigns[12];
     const char ** keysSignsPtr = (const char **) &keysSigns;
-    keysSignsPtr = iniparser_getseckeys(dir, "stabilizingmode", keysSignsPtr);
+    keysSignsPtr = iniparser_getseckeys(dir, "motordirections", keysSignsPtr);
     for (int i = 0; i<=3; i++){
         for (int j = 0; j<=2; j++){
             config.controllerConfig.signs[i][j] = iniparser_getdouble(dir, (keysSigns[3*i+j]),0);
@@ -75,19 +77,72 @@ void loadConfig(void){
     iniparser_freedict(dir);
 }
 
-void tick(void)
-{
+void flight(void)
+{   
     radio.update();
-    // imu.update();
+    imu.update();
     controller.update();
     data.batteryLevel = battery.read_u16();
     radio.setAcknowledgePayload(0);
 }
 
-int main()
+void checkThrottleLow(void)
+{
+    radio.update();
+    radio.setAcknowledgePayload(0);
+    if (data.remote.missedPackets > 200)
+    {
+        led = !led;
+    }
+    else
+    {
+        led = 1;
+        led2 = 1;
+        led3 = 0;
+        led4 = 0;
+    }
+    if (data.remote.throttle <= 25)
+    {
+        ticker.detach();
+        led = 1;
+        led2 = 1;
+        led3 = 1;
+        led4 = 1;
+        ticker.attach(&checkThrottleLow, config.tickerPeriod);
+        ticker.attach(&flight, config.tickerPeriod);
+    }
+}
+
+void checkThrottleHigh(void)
+{
+    radio.update();
+    radio.setAcknowledgePayload(0);
+    if (data.remote.missedPackets > 200)
+    {
+        led = !led;
+    }
+    else
+    {
+        led = 1;
+        led2 = 1;
+        led3 = 0;
+        led4 = 0;
+    }
+
+    if (data.remote.throttle >= 1000)
+    {
+        ticker.detach();
+        led = 1;
+        led2 = 1;
+        led3 = 1;
+        led4 = 0;
+        ticker.attach(&checkThrottleLow, config.tickerPeriod);
+    }
+}
+
+void initialize(void)
 {
     loadConfig();
-    wait(5);
     led = 0;
     led2 = 0;
     led3 = 0;
@@ -96,84 +151,34 @@ int main()
     status = radio.initialize(config, &data);
     if (status)
     {
-        led = 0;
-        led2 = 1;
+        led = 1;
+        led2 = 0;
         led3 = 0;
         led4 = 1;
-        return 0;
+        return;
     }
-    led = 1;
-    // imu.initialize(config, &data);
 
+    led = 1;
+
+    status = imu.initialize(config, &data);
+    if (status)
+    {
+        led = 1;
+        led2 = 0;
+        led3 = 1;
+        led4 = 1;
+        return;
+    }
     led2 = 1;
 
     radio.update();
 
-    while (data.remote.throttle > 25)
-    {
-        radio.update();
-        wait_ms(1);
-        if (data.remote.missedPackets > 200)
-        {
-            led = !led;
-        }
-        else
-        {
-            led = 1;
-            led2 = 1;
-            led3 = 0;
-            led4 = 0;
-        }
-        radio.setAcknowledgePayload(0);
-        // std::cout << data.remote.throttle << std::endl;
-    }
-
-    led3 = 1;
-
-    while (data.remote.throttle < 1000)
-    {
-        radio.update();
-        wait_ms(1);
-            if (data.remote.missedPackets>100){
-                led = !led;
-            } else if (data.remote.missedPackets == 0) {
-                led=1;
-                led2=1;
-                led3=1;
-                led4=0;
-            }
-            radio.setAcknowledgePayload(0);
-    }
-
-    led4 = 1;
-
-    while (data.remote.throttle > 25)
-    {
-        radio.update();
-        wait_ms(1);
-        if (data.remote.missedPackets > 9)
-        {
-            led = 1;
-            led2 = 0;
-            led3 = 0;
-            led4 = 1;
-        }
-        else
-        {
-                led=1;
-                led2=1;
-                led3=1;
-                led4=1;
-        }
-        radio.setAcknowledgePayload(0);
-    }
-
-    led = 0;
-    led2 = 0;
-    led3 = 0;
-    led4 = 0;
-
     controller.initialize(&data, &config.controllerConfig);
+    ticker.attach(&checkThrottleHigh, config.tickerPeriod);
 
-    ticker.attach(&tick, config.tickerPeriod);
+}
+
+int main()
+{
+    initialize();
 }

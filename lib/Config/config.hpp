@@ -21,12 +21,12 @@ struct remoteStruct
 
 struct imuStruct
 {
-    int16_t roll;
-    int16_t pitch;
-    int16_t yaw;
-    int16_t rollVelocity;
-    int16_t pitchVelocity;
-    int16_t yawVelocity;
+    float roll;
+    float pitch;
+    float yaw;
+    float rollVelocity;
+    float pitchVelocity;
+    float yawVelocity;
 };
 
 struct dataStruct

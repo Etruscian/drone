@@ -11,7 +11,7 @@ uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
     uint8_t statRegister = radio.getStatusRegister();
     if ((statRegister != 0x08) && (statRegister != 0x0e))
     {
-        std::cout << bitset<8>(statRegister) << std::endl;
+        std::cout << std::hex << bitset<8>(statRegister) << std::endl;
         return 1;
     }
     radio.setRfFrequency(2400 + config.radioConfig.channel);
@@ -37,10 +37,6 @@ bool Transceiver::messageAvailable()
     return status;
 }
 
-void Transceiver::send()
-{
-}
-
 void Transceiver::receive(int pipe, char *buffer, uint8_t length)
 {
     if (radio.readable())
@@ -56,8 +52,8 @@ void Transceiver::update(void)
         (*dataPtr).remote.roll = (int16_t)(rxData[3] << 8 | rxData[2]);
         (*dataPtr).remote.pitch = (int16_t)(rxData[5] << 8 | rxData[4]);
         (*dataPtr).remote.yaw = (int16_t)(rxData[7] << 8 | rxData[6]);
-        (*dataPtr).acroMode = ((bool)rxData[8] >> 1) & 0x01;
-        (*dataPtr).armMotor = (bool)rxData[8] & 0x01;
+        (*dataPtr).acroMode = 0;//((bool)rxData[9] >> 1) & 0x01;
+        (*dataPtr).armMotor = 1;//(bool)rxData[9] & 0x01;
         (*dataPtr).remote.missedPackets = 0;
     }
     else

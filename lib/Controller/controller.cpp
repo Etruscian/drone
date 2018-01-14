@@ -1,4 +1,5 @@
 #include "controller.hpp"
+#include <iostream>
 
 void Controller::initialize(dataStruct *data, controllerConfigStruct *controllerConfig)
 {
@@ -17,7 +18,14 @@ void Controller::initialize(dataStruct *data, controllerConfigStruct *controller
 
 void Controller::update(void)
 {
-    /*if ((*dataPtr).acroMode){
+    if (!(*dataPtr).armMotor){
+        escController[0].update(0);
+        escController[1].update(0);
+        escController[2].update(0);
+        escController[3].update(0);
+        return;
+    }
+    if ((*dataPtr).acroMode){
         for (int i=0;i<=3;i++){
             float rollVelocityError = (*dataPtr).remote.roll - (*dataPtr).imu.rollVelocity;
             float rollVelocityControlValue = (*controllerConfigPtr).acroModeConfig.Kp[i][0] * rollVelocityError;
@@ -34,11 +42,12 @@ void Controller::update(void)
 
     for (int i = 0; i<=3; i++){
         escController[i].update(setpoint[i]);
-    } */
+    }
 
-    uint8_t value = (uint8_t)((*dataPtr).remote.throttle / 1023.0 * 125.0); // - (*pitch)/90.0*45.0;
-    escController[0].update(value);
-    escController[1].update(value);
-    escController[2].update(value);
-    escController[3].update(value);
+
+    // uint8_t value = (uint8_t)((*dataPtr).remote.throttle / 1023.0 * 125.0); // - (*pitch)/90.0*45.0;
+    // escController[0].update(value);
+    // escController[1].update(value);
+    // escController[2].update(value);
+    // escController[3].update(value);
 }

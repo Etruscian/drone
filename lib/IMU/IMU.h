@@ -26,7 +26,7 @@ class IMU
     int initialize(configStruct config, dataStruct *data);
     void calibrate(void);
     void update(void);
-    void estimator(float *roll, float *pitch);
+    void estimator(float * roll, float * pitch);
 };
 
 #endif
