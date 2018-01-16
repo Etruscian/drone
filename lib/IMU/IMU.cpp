@@ -158,11 +158,10 @@ void IMU::update(void){
     // Get raw values from devices.
     getReadings();
 
-    if (!(*dataPtr).acroMode){
+    if ((*dataPtr).acroMode){
         (*dataPtr).imu.rollVelocity = velocities[0];
         (*dataPtr).imu.pitchVelocity = velocities[1];
         (*dataPtr).imu.yawVelocity = velocities[2];
-        std::cout << "Acro" << std::endl;
     }
     else {
         estimator(&(*dataPtr).imu.roll, &(*dataPtr).imu.pitch);

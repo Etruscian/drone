@@ -7,6 +7,7 @@
 #include <iostream>
 #include <bitset>
 
+RawSerial serialConnection(USBTX,USBRX);
 DigitalOut led(LED1), led2(LED2), led3(LED3), led4(LED4);
 AnalogIn battery(p20);
 dataStruct data;
@@ -16,9 +17,14 @@ Ticker ticker;
 Controller controller(p21, p22, p23, p24);
 IMU imu;
 
-Timer timer;
-
 uint8_t status;
+
+void rxInterrupt(void){
+    if (serialConnection.getc() == 'r')
+        { 
+        __NVIC_SystemReset();
+        }
+}
 
 void loadConfig(void){
     LocalFileSystem local("local");
@@ -108,7 +114,6 @@ void checkThrottleLow(void)
         led2 = 1;
         led3 = 1;
         led4 = 1;
-        ticker.attach(&checkThrottleLow, config.tickerPeriod);
         ticker.attach(&flight, config.tickerPeriod);
     }
 }
@@ -180,5 +185,6 @@ void initialize(void)
 
 int main()
 {
+    serialConnection.attach(&rxInterrupt, Serial::RxIrq);
     initialize();
 }

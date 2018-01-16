@@ -49,9 +49,9 @@ void Transceiver::update(void)
     {
         receive(NRF24L01P_PIPE_P0, rxData, transferSize);
         (*dataPtr).remote.throttle = (uint16_t)rxData[1] << 8 | rxData[0];
-        (*dataPtr).remote.roll = (int16_t)(rxData[3] << 8 | rxData[2]);
-        (*dataPtr).remote.pitch = (int16_t)(rxData[5] << 8 | rxData[4]);
-        (*dataPtr).remote.yaw = (int16_t)(rxData[7] << 8 | rxData[6]);
+        (*dataPtr).remote.roll = (float)((int16_t)(rxData[3] << 8 | rxData[2]));
+        (*dataPtr).remote.pitch = (float)((int16_t)(rxData[5] << 8 | rxData[4]));
+        (*dataPtr).remote.yaw = (float)((int16_t)(rxData[7] << 8 | rxData[6]));
         (*dataPtr).acroMode = 0;//((bool)rxData[9] >> 1) & 0x01;
         (*dataPtr).armMotor = 1;//(bool)rxData[9] & 0x01;
         (*dataPtr).remote.missedPackets = 0;
