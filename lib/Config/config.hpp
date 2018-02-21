@@ -53,12 +53,12 @@ struct radioConfigStruct
 
 struct acroModeStruct
 {
-    float Kp[4][3], Ki[4][3], Kd[4][3];
+    float Kp[3], Ki[3], Kd[3];
 };
 
 struct stabilizingModeStruct
 {
-    float Kp[4][3], Ki[4][3], Kd[4][3];
+    float Kp[3], Ki[3], Kd[3];
 };
 
 struct controllerConfigStruct

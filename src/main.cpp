@@ -38,23 +38,31 @@ void loadConfig(void){
     config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",0);
 
     // Read config for ACRO mode
-    char * keysAcro[36];
+    char * keysAcro[9];
     const char ** keysAcroPtr = (const char **) &keysAcro;
     keysAcroPtr = iniparser_getseckeys(dir, "acromode", keysAcroPtr);
-    for (int i = 0; i<=3; i++){
-        for (int j = 0; j<=2; j++){
-            config.controllerConfig.acroModeConfig.Kp[i][j] = iniparser_getdouble(dir, (keysAcro[3*i+j]),0);
-        }
+    for (int i = 0; i<=2; i++){
+        config.controllerConfig.acroModeConfig.Kp[i] = iniparser_getdouble(dir, (keysAcro[i]),0);
+    }
+    for (int i = 0; i<=2; i++){
+        config.controllerConfig.acroModeConfig.Ki[i] = iniparser_getdouble(dir, (keysAcro[i+3]),0);
+    }
+    for (int i = 0; i<=2; i++){
+        config.controllerConfig.acroModeConfig.Kd[i] = iniparser_getdouble(dir, (keysAcro[i+6]),0);
     }
 
     // Read config for stabilizing mode
-    char * keysStabilizing[36];
+    char * keysStabilizing[9];
     const char ** keysStabilizingPtr = (const char **) &keysStabilizing;
     keysStabilizingPtr = iniparser_getseckeys(dir, "stabilizingmode", keysStabilizingPtr);
-    for (int i = 0; i<=3; i++){
-        for (int j = 0; j<=2; j++){
-            config.controllerConfig.stabilizingModeConfig.Kp[i][j] = iniparser_getdouble(dir, (keysStabilizing[3*i+j]),0);
-        }
+    for (int i = 0; i<=2; i++){
+        config.controllerConfig.stabilizingModeConfig.Kp[i] = iniparser_getdouble(dir, (keysStabilizing[i]),0);
+    }
+    for (int i = 0; i<=2; i++){
+        config.controllerConfig.stabilizingModeConfig.Ki[i] = iniparser_getdouble(dir, (keysStabilizing[i+3]),0);
+    }
+    for (int i = 0; i<=2; i++){
+        config.controllerConfig.stabilizingModeConfig.Kd[i] = iniparser_getdouble(dir, (keysStabilizing[i+6]),0);
     }
 
     // Read config for motor direction compensation

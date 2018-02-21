@@ -16,7 +16,7 @@ class Controller
     float rollControlValue, pitchControlValue, yawControlValue;
     enum controllerModes {ACRO, STABILIZE};
     controllerModes controllerMode;
-    float Kp[4][3], Ki[4][3], Kd[4][3];
+    float Kp[3], Ki[3], Kd[3];
     void updateParameters(void);
 
   public:
