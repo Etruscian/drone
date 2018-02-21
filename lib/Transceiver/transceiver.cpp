@@ -5,42 +5,50 @@
 
 uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
 {
-    radio.powerUp();
+    _radio.powerUp();
 
     // Check is status register is correct, if not, a full reboot is needed :(
-    uint8_t statRegister = radio.getStatusRegister();
-    if ((statRegister != 0x08) && (statRegister != 0x0e))
+    uint8_t statRegister = _radio.getStatusRegister();
+    if ((statRegister != 0x08) && (statRegister != 0x0e) && (statRegister != 0x0f))
     {
+        // _radio.disable();
+        // _radio.powerDown();
+
+        // _radio.setRegister(,0x07);
         std::cout << std::hex << bitset<8>(statRegister) << std::endl;
         return 1;
     }
-    radio.setRfFrequency(2400 + config.radioConfig.channel);
-    radio.setTransferSize(config.radioConfig.transferSize);
-    radio.setCrcWidth(16);
-    radio.enableAutoAcknowledge(NRF24L01P_PIPE_P0);
-    radio.setRxAddress(config.radioConfig.rxAddress);
-    radio.setTxAddress(config.radioConfig.txAddress);
-    radio.setReceiveMode();
+    _radio.setRfFrequency(2400 + config.radioConfig.channel);
+    _radio.setTransferSize(config.radioConfig.transferSize);
+    _radio.setCrcWidth(16);
+    _radio.enableAutoAcknowledge(NRF24L01P_PIPE_P0);
+    _radio.setRxAddress(config.radioConfig.rxAddress);
+    _radio.setTxAddress(config.radioConfig.txAddress);
+    _radio.setReceiveMode();
 
-    radio.enable();
-
+    _radio.enable();
     transferSize = config.radioConfig.transferSize;
     rxData = new char[transferSize];
     dataPtr = data;
     return 0;
 }
 
+void Transceiver::powerDown(){
+    _radio.disable();
+    _radio.powerDown();
+}
+
 bool Transceiver::messageAvailable()
 {
     int status = 0;
-    status = radio.readable(NRF24L01P_PIPE_P0);
+    status = _radio.readable(NRF24L01P_PIPE_P0);
     return status;
 }
 
 void Transceiver::receive(int pipe, char *buffer, uint8_t length)
 {
-    if (radio.readable())
-        radio.read(pipe, buffer, length);
+    if (_radio.readable())
+        _radio.read(pipe, buffer, length);
 }
 
 void Transceiver::update(void)
@@ -67,5 +75,5 @@ void Transceiver::setAcknowledgePayload(int pipe)
     uint8_t package[4];
     package[0] = (*dataPtr).batteryLevel & 0xFF;
     package[1] = (*dataPtr).batteryLevel >> 8;
-    radio.writeAcknowledgePayload(pipe, &package[0], 2);
+    _radio.writeAcknowledgePayload(pipe, &package[0], 2);
 }

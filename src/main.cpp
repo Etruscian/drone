@@ -14,15 +14,16 @@ dataStruct data;
 configStruct config;
 Transceiver radio(p5, p6, p7, p8, p9, p10);
 Ticker ticker;
-Controller controller(p21, p22, p23, p24);
+Controller controller(p24, p22, p21, p23);
 IMU imu;
 
 uint8_t status;
 
 void rxInterrupt(void){
     if (serialConnection.getc() == 'r')
-        { 
-        __NVIC_SystemReset();
+        {
+            radio.powerDown();
+            __NVIC_SystemReset();
         }
 }
 
