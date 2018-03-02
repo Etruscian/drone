@@ -11,5 +11,5 @@ void ESCController::initialize(void)
 
 void ESCController::update(uint8_t value)
 {
-    pwm.pulsewidth_us(min(max(value + 125, 125), 150));
+    pwm.pulsewidth_us(min(max(value + 125, 125), 175));
 }

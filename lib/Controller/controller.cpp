@@ -44,7 +44,9 @@ void Controller::update(void)
     if (controllerMode == STABILIZE)
     {
         rollError = (*dataPtr).remote.roll/20 - (*dataPtr).imu.roll;
+        rollVelocityError = -(*dataPtr).imu.rollVelocity;
         pitchError = (*dataPtr).remote.pitch/20 - (*dataPtr).imu.pitch;
+        pitchVelocityError = -(*dataPtr).imu.pitchVelocity;
     }
 
     if (controllerMode == ACRO)
@@ -54,11 +56,11 @@ void Controller::update(void)
     }
 
     yawError = (*dataPtr).remote.yaw - (*dataPtr).imu.yawVelocity;
-
+    std::cout << (*dataPtr).imu.yawVelocity << '\t' << (*dataPtr).remote.yaw << std::endl;
     for (int i = 0; i <= 3; i++)
     {
-        rollControlValue = (*controllerConfigPtr).signs[i][0] * Kp[0] * rollError;
-        pitchControlValue = (*controllerConfigPtr).signs[i][1] * Kp[1] * pitchError;
+        rollControlValue = (*controllerConfigPtr).signs[i][0] * (Kp[0] * rollError + Kd[0] * rollVelocityError);
+        pitchControlValue = (*controllerConfigPtr).signs[i][1] * (Kp[1] * pitchError + Kd[1] * pitchVelocityError);
         yawControlValue = (*controllerConfigPtr).signs[i][2] * Kp[2] * yawError;
         setpoint[i] = (*dataPtr).remote.throttle / 1024.0 * 125.0 + rollControlValue + pitchControlValue + yawControlValue;
         escController[i].update(setpoint[i]);
@@ -77,7 +79,7 @@ void Controller::updateParameters(void)
         break;
 
     case STABILIZE:
-        for (int i = 0; i <= 3; i++)
+        for (int i = 0; i <= 2; i++)
         {
             Kp[i] = (*controllerConfigPtr).stabilizingModeConfig.Kp[i];
         }

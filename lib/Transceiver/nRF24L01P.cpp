@@ -175,8 +175,7 @@ nRF24L01P::nRF24L01P(PinName mosi,
                      PinName miso,
                      PinName sck,
                      PinName csn,
-                     PinName ce,
-                     PinName irq) : spi_(mosi, miso, sck), nCS_(csn), ce_(ce), nIRQ_(irq) {
+                     PinName ce) : spi_(mosi, miso, sck), nCS_(csn), ce_(ce) {
 
     mode = _NRF24L01P_MODE_UNKNOWN;
 
@@ -856,40 +855,34 @@ int nRF24L01P::write(int pipe, char *data, int count) {
     disable();
 
     if ( count <= 0 ) return 0;
-	// pc.printf("1\r\n");
     if ( count > _NRF24L01P_TX_FIFO_SIZE ) count = _NRF24L01P_TX_FIFO_SIZE;
-		// pc.printf("2\r\n");
+
     // Clear the Status bit
     setRegister(_NRF24L01P_REG_STATUS, _NRF24L01P_STATUS_TX_DS);
-		// pc.printf("3\r\n");
     nCS_ = 0;
 
     int status = spi_.write(_NRF24L01P_SPI_CMD_W_TX_PYLD_NO_ACK);
-		// pc.printf("4\r\n");
-		// pc.printf("%02x\r\n",status);
+
     for ( int i = 0; i < count; i++ ) {
 
         spi_.write(*data++);
 
     }
-	// pc.printf("5\r\n");
-	// pc.printf("%02x\r\n",status);
+
     nCS_ = 1;
 
     int originalMode = mode;
     setTransmitMode();
-	// pc.printf("6\r\n");
+
     enable();
     wait_us(_NRF24L01P_TIMING_Thce_us);
     disable();
-	// pc.printf("7\r\n");
+
 //	wait_us(100);
     while ( !( getStatusRegister() & _NRF24L01P_STATUS_TX_DS ) ) {
-//		pc.printf("%02x\r\n",getStatusRegister());
-//        // Wait for the transfer to complete
-//
+
+       // Wait for the transfer to complete
     }
-	// pc.printf("8\r\n");
     // Clear the Status bit
     setRegister(_NRF24L01P_REG_STATUS, _NRF24L01P_STATUS_TX_DS);
 
@@ -1040,6 +1033,22 @@ int nRF24L01P::getStatusRegister(void) {
 
     return status;
 
+}
+
+void nRF24L01P::flushTX(void){
+    nCS_ = 0;
+
+    int status = spi_.write(_NRF24L01P_SPI_CMD_FLUSH_TX);
+
+    nCS_ = 1;
+}
+
+void nRF24L01P::flushRX(void){
+    nCS_ = 0;
+
+    int status = spi_.write(_NRF24L01P_SPI_CMD_FLUSH_RX);
+
+    nCS_ = 1;
 }
 
 int nRF24L01P::writeAcknowledgePayload(int pipe, uint8_t * package, uint8_t length){

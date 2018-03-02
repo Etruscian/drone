@@ -5,6 +5,7 @@
 
 struct remoteStruct
 {
+    bool signalLost;
     uint16_t throttle;
     float roll;
     float pitch;
@@ -14,7 +15,8 @@ struct remoteStruct
     remoteStruct() : throttle(0),
                      roll(0),
                      pitch(0),
-                     yaw(0)
+                     yaw(0),
+                     signalLost(false)
     {
     }
 };
@@ -29,11 +31,16 @@ struct imuStruct
     float yawVelocity;
 };
 
+typedef union _batteryLevelUnion{
+    float f;
+    uint8_t u[4];
+} _batteryLevel;
+
 struct dataStruct
 {
     remoteStruct remote;
     imuStruct imu;
-    uint16_t batteryLevel;
+    _batteryLevel batteryLevel;
     bool acroMode;
     bool armMotor;
 

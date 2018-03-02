@@ -159,13 +159,15 @@ void IMU::update(void){
     getReadings();
 
     if ((*dataPtr).acroMode){
-        (*dataPtr).imu.rollVelocity = velocities[0];
-        (*dataPtr).imu.pitchVelocity = -velocities[1];
-        (*dataPtr).imu.yawVelocity = velocities[2];
+        (*dataPtr).imu.rollVelocity = -velocities[0];
+        (*dataPtr).imu.pitchVelocity = velocities[1];
+        (*dataPtr).imu.yawVelocity = -velocities[2];
     }
     else {
         estimator(&(*dataPtr).imu.roll, &(*dataPtr).imu.pitch);
-        (*dataPtr).imu.yawVelocity = -velocities[2];
+        (*dataPtr).imu.rollVelocity = -velocities[0];
+        (*dataPtr).imu.pitchVelocity = velocities[1];
+        (*dataPtr).imu.yawVelocity = velocities[2];
         // // Calculate quaternions from the raw values.
         // calculateQuaternions();
 
@@ -184,7 +186,7 @@ void IMU::estimator(float * roll, float * pitch){
     //float forceMagnitudeApprox = abs(accelerations[0]) + abs(accelerations[1]) + abs(accelerations[2]);
 
     float rollAcc = -atan2f(accelerations[1],accelerations[2])*180 / M_PI;
-    *roll = *roll * 0.95 + rollAcc * 0.05;
+    *roll = *roll * 0.90 + rollAcc * 0.1;
     float pitchAcc = -atan2f(accelerations[0],accelerations[2])*180 / M_PI;
-    *pitch = *pitch * 0.95 + pitchAcc * 0.05;
+    *pitch = *pitch * 0.90 + pitchAcc * 0.1;
 }

@@ -13,6 +13,7 @@ class Controller
     controllerConfigStruct *controllerConfigPtr;
     uint8_t setpoint[4];
     float rollError, pitchError, yawError;
+    float rollVelocityError, pitchVelocityError, yawVelocityError;
     float rollControlValue, pitchControlValue, yawControlValue;
     enum controllerModes {ACRO, STABILIZE};
     controllerModes controllerMode;

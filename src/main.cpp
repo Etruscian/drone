@@ -12,7 +12,7 @@ DigitalOut led(LED1), led2(LED2), led3(LED3), led4(LED4);
 AnalogIn battery(p20);
 dataStruct data;
 configStruct config;
-Transceiver radio(p5, p6, p7, p8, p9, p10);
+Transceiver radio(p5, p6, p7, p8, p9);
 Ticker ticker;
 Controller controller(p24, p22, p21, p23);
 IMU imu;
@@ -32,10 +32,10 @@ void loadConfig(void){
     dictionary *dir = iniparser_load("/local/config.ini");
 
     // Read config for radio
-    config.radioConfig.channel = iniparser_getint(dir, "radio:channel",0);
-    config.radioConfig.txAddress = iniparser_getlongint(dir, "radio:txaddress",0);
-    config.radioConfig.rxAddress = iniparser_getlongint(dir, "radio:rxaddress",0);
-    config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",0);
+    config.radioConfig.channel = iniparser_getint(dir, "radio:channel",101);
+    config.radioConfig.txAddress = iniparser_getlongint(dir, "radio:txaddress",0x007FFFFFFF);
+    config.radioConfig.rxAddress = iniparser_getlongint(dir, "radio:rxaddress",0x007FFFFFFF);
+    config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",10);
 
     // Read config for ACRO mode
     char * keysAcro[9];
@@ -88,68 +88,57 @@ void loadConfig(void){
     config.imuconfig.adxl345.b = iniparser_getdouble(dir, "adxl345:b",0);
     config.imuconfig.adxl345.c = iniparser_getdouble(dir, "adxl345:c",0);
 
-    config.tickerPeriod = (float) iniparser_getdouble(dir, "misc:tickerperiod",0);
+    config.tickerPeriod = (float) iniparser_getdouble(dir, "misc:tickerperiod",0.01);
     iniparser_freedict(dir);
 }
 
 void flight(void)
 {   
-    radio.update();
+    // radio.update();
     imu.update();
+    if (data.remote.signalLost){
+        data.remote.throttle = 0;
+        led4 = 1;
+    } else 
+        led4 = 0;
     controller.update();
-    data.batteryLevel = battery.read_u16();
-    radio.setAcknowledgePayload(0);
+    data.batteryLevel.f = battery.read()*33.6247;
+    // radio.setAcknowledgePayload(0);
 }
 
 void checkThrottleLow(void)
 {
-    radio.update();
-    radio.setAcknowledgePayload(0);
-    if (data.remote.missedPackets > 200)
-    {
-        led = !led;
-    }
-    else
-    {
-        led = 1;
-        led2 = 1;
-        led3 = 0;
+    // radio.update();
+    if (data.remote.signalLost){
+        data.remote.throttle = 0;
+        led4 = 1;
+    } else 
         led4 = 0;
-    }
+    // radio.setAcknowledgePayload(0);
+
     if (data.remote.throttle <= 25)
     {
         ticker.detach();
-        led = 1;
-        led2 = 1;
-        led3 = 1;
-        led4 = 1;
+        led3 = 0;
         ticker.attach(&flight, config.tickerPeriod);
     }
 }
 
 void checkThrottleHigh(void)
 {
-    radio.update();
-    radio.setAcknowledgePayload(0);
-    if (data.remote.missedPackets > 200)
-    {
-        led = !led;
-    }
-    else
-    {
-        led = 1;
-        led2 = 1;
-        led3 = 0;
+    // radio.update();
+    if (data.remote.signalLost){
+        data.remote.throttle = 0;
+        led4 = 1;
+    } else 
         led4 = 0;
-    }
+    // radio.setAcknowledgePayload(0);
 
+    // std::cout << data.remote.throttle << std::endl;
     if (data.remote.throttle >= 1000)
     {
         ticker.detach();
-        led = 1;
-        led2 = 1;
         led3 = 1;
-        led4 = 0;
         ticker.attach(&checkThrottleLow, config.tickerPeriod);
     }
 }
@@ -166,27 +155,21 @@ void initialize(void)
     if (status)
     {
         led = 1;
-        led2 = 0;
-        led3 = 0;
-        led4 = 1;
         return;
     }
-
-    led = 1;
 
     status = imu.initialize(config, &data);
     if (status)
     {
-        led = 1;
-        led2 = 0;
-        led3 = 1;
-        led4 = 1;
+        led2 = 1;
         return;
     }
-    led2 = 1;
-
-    radio.update();
-
+    // led4 = 1;
+    while(!radio.firstPacketReceived){
+        // std::cout << std::hex << config.radioConfig.txAddress << '\t' << std::hex << config.radioConfig.rxAddress << '\t' << std::dec << (uint16_t)config.radioConfig.channel << std::endl;
+    }
+        // radio.update();
+    led4 = 0;
     controller.initialize(&data, &config.controllerConfig);
     ticker.attach(&checkThrottleHigh, config.tickerPeriod);
 
