@@ -5,11 +5,11 @@
 
 struct remoteStruct
 {
-    bool signalLost;
     uint16_t throttle;
     float roll;
     float pitch;
     float yaw;
+    bool signalLost;
     uint16_t missedPackets;
 
     remoteStruct() : throttle(0),

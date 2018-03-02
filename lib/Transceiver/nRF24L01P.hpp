@@ -333,13 +333,14 @@ public:
 
     void flushTX(void);
     void flushRX(void);
-    
+
 private:
     SPI         spi_;
     DigitalOut  nCS_;
     DigitalOut  ce_;
-    // InterruptIn nIRQ_;
 
+    void spiInterruptHandler(int);
+    bool transferComplete;
     int mode;
 
 };

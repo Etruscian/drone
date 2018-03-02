@@ -13,6 +13,7 @@ AnalogIn battery(p20);
 dataStruct data;
 configStruct config;
 Transceiver radio(p5, p6, p7, p8, p9);
+InterruptIn radioInterrupt(p10);
 Ticker ticker;
 Controller controller(p24, p22, p21, p23);
 IMU imu;
@@ -114,6 +115,7 @@ void checkThrottleLow(void)
         led4 = 1;
     } else 
         led4 = 0;
+    data.batteryLevel.f = battery.read()*33.6247;
     // radio.setAcknowledgePayload(0);
 
     if (data.remote.throttle <= 25)
@@ -132,6 +134,7 @@ void checkThrottleHigh(void)
         led4 = 1;
     } else 
         led4 = 0;
+    data.batteryLevel.f = battery.read()*33.6247;
     // radio.setAcknowledgePayload(0);
 
     // std::cout << data.remote.throttle << std::endl;
@@ -157,15 +160,16 @@ void initialize(void)
         led = 1;
         return;
     }
-
+    radioInterrupt.fall(callback(&radio, &Transceiver::interruptHandler));
     status = imu.initialize(config, &data);
     if (status)
     {
         led2 = 1;
         return;
     }
-    // led4 = 1;
+    led4 = 1;
     while(!radio.firstPacketReceived){
+        data.batteryLevel.f = battery.read()*33.6247;
         // std::cout << std::hex << config.radioConfig.txAddress << '\t' << std::hex << config.radioConfig.rxAddress << '\t' << std::dec << (uint16_t)config.radioConfig.channel << std::endl;
     }
         // radio.update();

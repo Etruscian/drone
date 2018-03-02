@@ -7,7 +7,6 @@ uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
 {
     firstPacketReceived = false;
     _radio.powerUp();
-    radioInterrupt.fall(this, &Transceiver::interruptHandler);
 
     // Check is status register is correct, if not, a full reboot is needed :(
     uint8_t statRegister = _radio.getStatusRegister();
@@ -80,6 +79,7 @@ void Transceiver::interruptHandler(void){
         // do {
             _radio.read((status & 14) >> 1, rxData, transferSize);
             _radio.setRegister(0x07, 64);
+            send(0,(char * )(*dataPtr).batteryLevel.u,4);
         // } while (!(_radio.getRegister(0x17) & 1));
         // 
         // (*dataPtr).remote.throttle = 0;//(uint16_t)rxData[1] << 8 | rxData[0];
@@ -96,6 +96,10 @@ void Transceiver::receive(int pipe, char *buffer, uint8_t length)
 {
     if (_radio.readable())
         _radio.read(pipe, buffer, length);
+}
+
+void Transceiver::send(uint8_t pipe, char * buffer, uint8_t length){
+    _radio.write(pipe, buffer, length);
 }
 
 uint8_t Transceiver::movingAvg(uint8_t *ptrArrNumbers, uint16_t *ptrSum, uint8_t pos, uint16_t len, uint8_t nextNum)

@@ -63,7 +63,8 @@ void Controller::update(void)
         pitchControlValue = (*controllerConfigPtr).signs[i][1] * (Kp[1] * pitchError + Kd[1] * pitchVelocityError);
         yawControlValue = (*controllerConfigPtr).signs[i][2] * Kp[2] * yawError;
         setpoint[i] = (*dataPtr).remote.throttle / 1024.0 * 125.0 + rollControlValue + pitchControlValue + yawControlValue;
-        escController[i].update(setpoint[i]);
+        // escController[i].update(setpoint[i]);
+        escController[i].update(0);
     }
 }
 
