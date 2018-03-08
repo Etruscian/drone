@@ -11,7 +11,9 @@ class Controller
     ESCController escController[4];
     dataStruct *dataPtr;
     controllerConfigStruct *controllerConfigPtr;
-    uint8_t setpoint[4];
+    float setpoint[4];
+    float throttle, roll, pitch, yaw;
+    float throttleRemote, rollRemote, pitchRemote, yawRemote;
     float rollError, pitchError, yawError;
     float rollVelocityError, pitchVelocityError, yawVelocityError;
     float rollControlValue, pitchControlValue, yawControlValue;

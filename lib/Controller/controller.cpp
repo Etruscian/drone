@@ -20,7 +20,7 @@ void Controller::initialize(dataStruct *data, controllerConfigStruct *controller
 
 void Controller::update(void)
 {
-    if (!(*dataPtr).armMotor || ((*dataPtr).remote.throttle<=10 ))
+    if (!(*dataPtr).armMotor || ((*dataPtr).remote.throttle<=0.05 ))
     {
         escController[0].update(0);
         escController[1].update(0);
@@ -41,30 +41,43 @@ void Controller::update(void)
         updateParameters();
     }
 
+    if ((*dataPtr).newPacket){
+        throttleRemote = (*dataPtr).remote.throttle;
+        rollRemote = (*dataPtr).remote.roll;
+        pitchRemote = (*dataPtr).remote.pitch;
+        yawRemote = (*dataPtr).remote.yaw;
+        (*dataPtr).newPacket = false;
+    }
+
+    throttle = throttle * 0.95 + throttleRemote * 0.05;
+    roll = roll * 0.9 + rollRemote * 0.1;
+    pitch = pitch * 0.9 + pitchRemote * 0.1;
+    yaw = yaw * 0.9 + yawRemote * 0.1;
+
     if (controllerMode == STABILIZE)
     {
-        rollError = (*dataPtr).remote.roll/20 - (*dataPtr).imu.roll;
+        rollError = roll - (*dataPtr).imu.roll;
         rollVelocityError = -(*dataPtr).imu.rollVelocity;
-        pitchError = (*dataPtr).remote.pitch/20 - (*dataPtr).imu.pitch;
+        pitchError = pitch - (*dataPtr).imu.pitch;
         pitchVelocityError = -(*dataPtr).imu.pitchVelocity;
     }
 
     if (controllerMode == ACRO)
     {
-        rollError = (*dataPtr).remote.roll/20 - (*dataPtr).imu.rollVelocity;
-        pitchError = (*dataPtr).remote.pitch/20 - (*dataPtr).imu.pitchVelocity;
+        rollError = roll - (*dataPtr).imu.rollVelocity;
+        pitchError = pitch - (*dataPtr).imu.pitchVelocity;
     }
 
-    yawError = (*dataPtr).remote.yaw - (*dataPtr).imu.yawVelocity;
-    std::cout << (*dataPtr).imu.yawVelocity << '\t' << (*dataPtr).remote.yaw << std::endl;
+    yawError = yaw - (*dataPtr).imu.yawVelocity;
+
     for (int i = 0; i <= 3; i++)
     {
         rollControlValue = (*controllerConfigPtr).signs[i][0] * (Kp[0] * rollError + Kd[0] * rollVelocityError);
         pitchControlValue = (*controllerConfigPtr).signs[i][1] * (Kp[1] * pitchError + Kd[1] * pitchVelocityError);
         yawControlValue = (*controllerConfigPtr).signs[i][2] * Kp[2] * yawError;
-        setpoint[i] = (*dataPtr).remote.throttle / 1024.0 * 125.0 + rollControlValue + pitchControlValue + yawControlValue;
+        setpoint[i] = throttle * 125.0 + rollControlValue + pitchControlValue + yawControlValue;
         // escController[i].update(setpoint[i]);
-        escController[i].update(0);
+        escController[i].update(throttle*125);
     }
 }
 

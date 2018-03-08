@@ -144,11 +144,9 @@ int ADXL345::read(float * fx, float * fy, float * fz){
     buffer[0] = REG_DATA_X;
     i2c.write(ADXL345_ADDRESS,buffer,1,true);
 
-//    Serial pc(USBTX, USBRX); // tx, rx
-
     // request data from device
     i2c.read(ADXL345_ADDRESS,buffer,6);
-//    pc.printf("%02x%02x%02x%02x\r\n",buffer[0],buffer[1],buffer[2],buffer[3]);
+
     // calculate data from raw readings
     x = ((float)((int16_t)(buffer[1]<<8)+buffer[0]))*gRange/(1023.0);
     y = ((float)((int16_t)(buffer[3]<<8)+buffer[2]))*gRange/(1023.0);

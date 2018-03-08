@@ -1,32 +1,25 @@
 #include <mbed.h>
+#include "Watchdog.hpp"
 #include <config.hpp>
 #include "iniparser.h"
 #include "transceiver.h"
 #include "IMU.h"
 #include "controller.hpp"
-#include <iostream>
-#include <bitset>
 
-RawSerial serialConnection(USBTX,USBRX);
+Watchdog watchdog;
+
+Serial pc(USBTX,USBRX);
 DigitalOut led(LED1), led2(LED2), led3(LED3), led4(LED4);
 AnalogIn battery(p20);
 dataStruct data;
 configStruct config;
 Transceiver radio(p5, p6, p7, p8, p9);
 InterruptIn radioInterrupt(p10);
-Ticker ticker;
+Ticker controllerInterrupt, imuInterrupt;
 Controller controller(p24, p22, p21, p23);
 IMU imu;
 
 uint8_t status;
-
-void rxInterrupt(void){
-    if (serialConnection.getc() == 'r')
-        {
-            radio.powerDown();
-            __NVIC_SystemReset();
-        }
-}
 
 void loadConfig(void){
     LocalFileSystem local("local");
@@ -37,6 +30,12 @@ void loadConfig(void){
     config.radioConfig.txAddress = iniparser_getlongint(dir, "radio:txaddress",0x007FFFFFFF);
     config.radioConfig.rxAddress = iniparser_getlongint(dir, "radio:rxaddress",0x007FFFFFFF);
     config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",10);
+
+    // Read remote prescalers
+    config.controllerConfig.prescaler[0] = iniparser_getint(dir, "controller:prescaler_roll",0);
+    config.controllerConfig.prescaler[1] = iniparser_getint(dir, "controller:prescaler_pitch",0);
+    config.controllerConfig.prescaler[2] = iniparser_getint(dir, "controller:prescaler_yaw",0);
+
 
     // Read config for ACRO mode
     char * keysAcro[9];
@@ -93,56 +92,41 @@ void loadConfig(void){
     iniparser_freedict(dir);
 }
 
+void imuUpdate(void){
+    imu.update();
+}
+
 void flight(void)
 {   
-    // radio.update();
-    imu.update();
-    if (data.remote.signalLost){
-        data.remote.throttle = 0;
-        led4 = 1;
-    } else 
-        led4 = 0;
+    watchdog.kick();
     controller.update();
     data.batteryLevel.f = battery.read()*33.6247;
-    // radio.setAcknowledgePayload(0);
 }
 
 void checkThrottleLow(void)
 {
-    // radio.update();
-    if (data.remote.signalLost){
-        data.remote.throttle = 0;
-        led4 = 1;
-    } else 
-        led4 = 0;
     data.batteryLevel.f = battery.read()*33.6247;
-    // radio.setAcknowledgePayload(0);
 
-    if (data.remote.throttle <= 25)
+    if (data.remote.throttle <= 0.02)
     {
-        ticker.detach();
+        controllerInterrupt.detach();
         led3 = 0;
-        ticker.attach(&flight, config.tickerPeriod);
+        controllerInterrupt.attach(&flight, config.tickerPeriod);
+        imuInterrupt.attach(&imuUpdate,0.001);
+        watchdog.kick(0.05);
     }
 }
 
 void checkThrottleHigh(void)
 {
-    // radio.update();
-    if (data.remote.signalLost){
-        data.remote.throttle = 0;
-        led4 = 1;
-    } else 
-        led4 = 0;
     data.batteryLevel.f = battery.read()*33.6247;
-    // radio.setAcknowledgePayload(0);
 
-    // std::cout << data.remote.throttle << std::endl;
-    if (data.remote.throttle >= 1000)
+    if (data.remote.throttle >= 0.95)
     {
-        ticker.detach();
+        controllerInterrupt.detach();
         led3 = 1;
-        ticker.attach(&checkThrottleLow, config.tickerPeriod);
+        controllerInterrupt.attach(&checkThrottleLow, config.tickerPeriod);
+        
     }
 }
 
@@ -168,19 +152,15 @@ void initialize(void)
         return;
     }
     led4 = 1;
-    while(!radio.firstPacketReceived){
+    while(!data.newPacket){
         data.batteryLevel.f = battery.read()*33.6247;
-        // std::cout << std::hex << config.radioConfig.txAddress << '\t' << std::hex << config.radioConfig.rxAddress << '\t' << std::dec << (uint16_t)config.radioConfig.channel << std::endl;
     }
-        // radio.update();
     led4 = 0;
     controller.initialize(&data, &config.controllerConfig);
-    ticker.attach(&checkThrottleHigh, config.tickerPeriod);
-
+    controllerInterrupt.attach(&checkThrottleHigh, config.tickerPeriod);
 }
 
 int main()
 {
-    serialConnection.attach(&rxInterrupt, Serial::RxIrq);
     initialize();
 }

@@ -5,7 +5,7 @@
 
 struct remoteStruct
 {
-    uint16_t throttle;
+    float throttle;
     float roll;
     float pitch;
     float yaw;
@@ -43,9 +43,11 @@ struct dataStruct
     _batteryLevel batteryLevel;
     bool acroMode;
     bool armMotor;
+    bool newPacket;
 
     dataStruct() : acroMode(true),
-                   armMotor(false)
+                   armMotor(false),
+                   newPacket(false)
     {
     }
 };
@@ -73,6 +75,7 @@ struct controllerConfigStruct
     acroModeStruct acroModeConfig;
     stabilizingModeStruct stabilizingModeConfig;
     int8_t signs[4][3];
+    int8_t prescaler[3];
 };
 
 struct ITG3200ConfigStruct

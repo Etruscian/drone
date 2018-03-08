@@ -2,15 +2,16 @@
 #define ESCCONTROLLER_H
 
 #include "mbed.h"
+#include "FastPWM.h"
 
 class ESCController{
     private:
-    PwmOut pwm;
+    FastPWM pwm;
 
     public:
     ESCController(PinName pin): pwm(pin) {};
     void initialize();
-    void update(uint8_t);
+    void update(float);
 
 };
 

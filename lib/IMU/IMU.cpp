@@ -63,7 +63,7 @@ void IMU::getReadings(void){
     itg3200.read(&temp,&velocities[0],&velocities[1],&velocities[2]);
 
     // Read from magnetometer.
-    hmc5883l.read(&heading[0],&heading[1],&heading[2]);
+    //hmc5883l.read(&heading[0],&heading[1],&heading[2]);
 }
 
 /*

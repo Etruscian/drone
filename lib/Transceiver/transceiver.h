@@ -4,15 +4,21 @@
 
 class Transceiver{
     private:
+        typedef union _floatUintUnion {
+            float f;
+            char c[4];
+        } _floatUint;
+
         nRF24L01P _radio;
         uint8_t transferSize;
-        char * rxData;
+        char * rxBuffer;
+        _floatUint rxData[4];
         dataStruct * dataPtr;
         uint8_t pos, status;
         uint8_t movingAvg(uint8_t *ptrArrNumbers, uint16_t *ptrSum, uint8_t pos, uint16_t len, uint8_t nextNum);
-        uint8_t signalStrengthArray[256];
+        uint8_t signalStrengthArray[80];
         uint16_t sum;
-        volatile uint8_t packetReceived;
+        int8_t prescaler[3];
         volatile uint8_t signalStrength;
         uint16_t signalLostTimeout;
 
@@ -26,5 +32,5 @@ class Transceiver{
         void setAcknowledgePayload(int pipe);
         void powerDown();
         void interruptHandler(void);
-        bool firstPacketReceived;
+        volatile bool packetReceived;
     };
