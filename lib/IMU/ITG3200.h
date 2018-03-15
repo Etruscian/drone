@@ -13,6 +13,7 @@ class ITG3200{
         static const int  REG_DATA_X = 0x1D;
         static const int  REG_DATA_Y = 0x1F;
         static const int  REG_DATA_Z = 0x21;
+        static const int  REG_POWER_MANAGEMENT = 0x3E;
 
 
         static const int  SAMPLE_RATE_8KHZ_256 = 0x00;
@@ -25,6 +26,16 @@ class ITG3200{
 
         static const int  FS_OFFSET = 0x03;
         static const int  FS_SELECT = 0x03;
+
+        static const int  CLOCK_SELECT_OFFSET = 0x00;
+        static const int  INTERNAL_OSCILLATOR = 0x00;
+        static const int  PLL_GYRO_X = 0x01;
+        static const int  PLL_GYRO_Y = 0x02;
+        static const int  PLL_GYRO_Z = 0x03;
+        static const int  PLL_EXTERNAL_32KHZ = 0x04;
+        static const int  PLL_EXTERNAL_19MHZ = 0x05;
+
+        static const int  RESET_OFFSET = 0x07;
 
         static const float scaleFactor = 14.375;
 

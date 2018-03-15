@@ -2,13 +2,16 @@
 #define CONTROLLER_H
 
 #include <mbed.h>
+#include "PID.hpp"
 #include "ESCController.hpp"
 #include "config.hpp"
+
 
 class Controller
 {
   private:
     ESCController escController[4];
+    PID pidRoll, pidPitch, pidYaw;
     dataStruct *dataPtr;
     controllerConfigStruct *controllerConfigPtr;
     float setpoint[4];

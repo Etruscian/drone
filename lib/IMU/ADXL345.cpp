@@ -21,7 +21,7 @@ int ADXL345::initialize(uint16_t gRangeInput, float xFilter, float yFilter, floa
     }
 
     buffer[0] = REG_BW_RATE;
-    buffer[1] = CMD_DATA_RATE_200HZ;
+    buffer[1] = CMD_DATA_RATE_800HZ;
     status = i2c.write(ADXL345_ADDRESS,buffer,2);
     if (status != 0){
         return 2;

@@ -42,10 +42,12 @@ struct dataStruct
     imuStruct imu;
     _batteryLevel batteryLevel;
     bool acroMode;
+    bool armMotorRequested;
     bool armMotor;
     bool newPacket;
 
     dataStruct() : acroMode(true),
+                   armMotorRequested(false),
                    armMotor(false),
                    newPacket(false)
     {

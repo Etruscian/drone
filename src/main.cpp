@@ -1,15 +1,15 @@
 #include <mbed.h>
-#include "Watchdog.hpp"
+// #include "Watchdog.hpp"
 #include <config.hpp>
 #include "iniparser.h"
 #include "transceiver.h"
 #include "IMU.h"
 #include "controller.hpp"
 
-Watchdog watchdog;
+// Watchdog watchdog;
 
 Serial pc(USBTX,USBRX);
-DigitalOut led(LED1), led2(LED2), led3(LED3), led4(LED4);
+DigitalOut led(LED1), led2(LED2), led3(LED3), led4(LED4), radioPower(p30);
 AnalogIn battery(p20);
 dataStruct data;
 configStruct config;
@@ -98,37 +98,38 @@ void imuUpdate(void){
 
 void flight(void)
 {   
-    watchdog.kick();
+    // watchdog.kick();
+    imu.update();
     controller.update();
-    data.batteryLevel.f = battery.read()*33.6247;
+    data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
 }
 
-void checkThrottleLow(void)
-{
-    data.batteryLevel.f = battery.read()*33.6247;
+// void checkThrottleLow(void)
+// {
+//     data.batteryLevel.f = battery.read()*3.3*(81.6+475.5)/81.6;
 
-    if (data.remote.throttle <= 0.02)
-    {
-        controllerInterrupt.detach();
-        led3 = 0;
-        controllerInterrupt.attach(&flight, config.tickerPeriod);
-        imuInterrupt.attach(&imuUpdate,0.001);
-        watchdog.kick(0.05);
-    }
-}
+//     if (data.remote.throttle <= 0.02)
+//     {
+//         controllerInterrupt.detach();
+//         led3 = 0;
+//         controllerInterrupt.attach(&flight, config.tickerPeriod);
+//         
+//         
+//     }
+// }
 
-void checkThrottleHigh(void)
-{
-    data.batteryLevel.f = battery.read()*33.6247;
+// void checkThrottleHigh(void)
+// {
+//     data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
 
-    if (data.remote.throttle >= 0.95)
-    {
-        controllerInterrupt.detach();
-        led3 = 1;
-        controllerInterrupt.attach(&checkThrottleLow, config.tickerPeriod);
+//     if (data.remote.throttle >= 0.95)
+//     {
+//         controllerInterrupt.detach();
+//         led3 = 1;
+//         controllerInterrupt.attach(&checkThrottleLow, config.tickerPeriod);
         
-    }
-}
+//     }
+// }
 
 void initialize(void)
 {
@@ -137,7 +138,8 @@ void initialize(void)
     led2 = 0;
     led3 = 0;
     led4 = 0;
-
+    radioPower=1;
+    wait(1);
     status = radio.initialize(config, &data);
     if (status)
     {
@@ -153,11 +155,13 @@ void initialize(void)
     }
     led4 = 1;
     while(!data.newPacket){
-        data.batteryLevel.f = battery.read()*33.6247;
+        data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
     }
     led4 = 0;
     controller.initialize(&data, &config.controllerConfig);
-    controllerInterrupt.attach(&checkThrottleHigh, config.tickerPeriod);
+    controllerInterrupt.attach(&flight, config.tickerPeriod);
+    // imuInterrupt.attach(&imuUpdate,0.001);
+    // watchdog.kick(0.05);
 }
 
 int main()

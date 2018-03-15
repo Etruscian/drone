@@ -14,7 +14,17 @@ class ADXL345{
         static const int REG_DATA_Z = 0x36;
 
         static const int CMD_MEASUREMENT_MODE = 0x08;
+        static const int CMD_DATA_RATE_6_25HZ = 0x06;
+        static const int CMD_DATA_RATE_12_5HZ = 0x07;
+        static const int CMD_DATA_RATE_25HZ = 0x08;
+        static const int CMD_DATA_RATE_50HZ = 0x09;
+        static const int CMD_DATA_RATE_100HZ = 0x0A;
         static const int CMD_DATA_RATE_200HZ = 0x0B;
+        static const int CMD_DATA_RATE_400HZ = 0x0C;
+        static const int CMD_DATA_RATE_800HZ = 0x0D;
+        static const int CMD_DATA_RATE_1600HZ = 0x0E;
+        static const int CMD_DATA_RATE_3200HZ = 0x0F;
+        
         static const int CMD_DATA_FORMAT_FULL_RES_16G = 0x0B;
         static const int CMD_SELF_TEST = 0x80;
 

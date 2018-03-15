@@ -6,7 +6,6 @@
 uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
 {
     packetReceived = false;
-    _radio.powerUp();
 
     // Check is status register is correct, if not, a full reboot is needed :(
     uint8_t statRegister = _radio.getStatusRegister();
@@ -23,7 +22,7 @@ uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
     _radio.setTxAddress(config.radioConfig.txAddress);
     _radio.setAirDataRate(NRF24L01P_DATARATE_250_KBPS);
     _radio.setReceiveMode();
-
+    _radio.powerUp();
     _radio.enable();
     transferSize = config.radioConfig.transferSize;
     rxBuffer = new char[transferSize];
@@ -78,15 +77,15 @@ void Transceiver::interruptHandler(void){
         _radio.read((status & 14) >> 1, rxBuffer, transferSize);
         _radio.setRegister(0x07, 64);
         send(0,(char * )(*dataPtr).batteryLevel.u,4);
-        for (int i = 0; i<16;i++){
+        for (int i = 0; i<15;i++){
             rxData[i/4].c[i & 3] = rxBuffer[i];
         }
         (*dataPtr).remote.throttle = rxData[0].f;
         (*dataPtr).remote.roll = rxData[1].f * prescaler[0];
         (*dataPtr).remote.pitch = rxData[2].f * prescaler[1];
         (*dataPtr).remote.yaw = rxData[3].f * prescaler[2];
-        (*dataPtr).acroMode =((bool)rxData[16].c[0] >> 1) & 0x01;
-        (*dataPtr).armMotor = (bool)rxData[16].c[0] & 0x01;
+        (*dataPtr).armMotor =((bool)rxBuffer[16] >> 1) & 0x01;
+        (*dataPtr).acroMode = (bool)rxBuffer[16] & 0x01;
     }
     
 }
