@@ -115,7 +115,7 @@ struct configStruct
     radioConfigStruct radioConfig;
     controllerConfigStruct controllerConfig;
     imuConfigStruct imuconfig;
-    float tickerPeriod;
+    uint16_t tickerFrequency;
 };
 
 #endif

@@ -2,6 +2,7 @@
 // #include "Watchdog.hpp"
 #include <config.hpp>
 #include "iniparser.h"
+#include "serialHandler.hpp"
 #include "transceiver.h"
 #include "IMU.h"
 #include "controller.hpp"
@@ -9,6 +10,7 @@
 // Watchdog watchdog;
 
 Serial pc(USBTX,USBRX);
+SerialHandler serial;
 DigitalOut led(LED1), led2(LED2), led3(LED3), led4(LED4), radioPower(p30);
 AnalogIn battery(p20);
 dataStruct data;
@@ -27,9 +29,9 @@ void loadConfig(void){
 
     // Read config for radio
     config.radioConfig.channel = iniparser_getint(dir, "radio:channel",101);
-    config.radioConfig.txAddress = iniparser_getlongint(dir, "radio:txaddress",0x007FFFFFFF);
-    config.radioConfig.rxAddress = iniparser_getlongint(dir, "radio:rxaddress",0x007FFFFFFF);
-    config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",10);
+    config.radioConfig.txAddress = iniparser_getlongint(dir, "radio:txaddress",0x007DEADBEE);
+    config.radioConfig.rxAddress = iniparser_getlongint(dir, "radio:rxaddress",0x007DEADBEE);
+    config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",17);
 
     // Read remote prescalers
     config.controllerConfig.prescaler[0] = iniparser_getint(dir, "controller:prescaler_roll",0);
@@ -71,7 +73,7 @@ void loadConfig(void){
     keysSignsPtr = iniparser_getseckeys(dir, "motordirections", keysSignsPtr);
     for (int i = 0; i<=3; i++){
         for (int j = 0; j<=2; j++){
-            config.controllerConfig.signs[i][j] = iniparser_getdouble(dir, (keysSigns[3*i+j]),0);
+            config.controllerConfig.signs[i][j] = iniparser_getint(dir, (keysSigns[3*i+j]),0);
         }
     }
 
@@ -88,7 +90,7 @@ void loadConfig(void){
     config.imuconfig.adxl345.b = iniparser_getdouble(dir, "adxl345:b",0);
     config.imuconfig.adxl345.c = iniparser_getdouble(dir, "adxl345:c",0);
 
-    config.tickerPeriod = (float) iniparser_getdouble(dir, "misc:tickerperiod",0.01);
+    config.tickerFrequency = (uint16_t) iniparser_getint(dir, "misc:tickerfrequency",500);
     iniparser_freedict(dir);
 }
 
@@ -103,33 +105,6 @@ void flight(void)
     controller.update();
     data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
 }
-
-// void checkThrottleLow(void)
-// {
-//     data.batteryLevel.f = battery.read()*3.3*(81.6+475.5)/81.6;
-
-//     if (data.remote.throttle <= 0.02)
-//     {
-//         controllerInterrupt.detach();
-//         led3 = 0;
-//         controllerInterrupt.attach(&flight, config.tickerPeriod);
-//         
-//         
-//     }
-// }
-
-// void checkThrottleHigh(void)
-// {
-//     data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
-
-//     if (data.remote.throttle >= 0.95)
-//     {
-//         controllerInterrupt.detach();
-//         led3 = 1;
-//         controllerInterrupt.attach(&checkThrottleLow, config.tickerPeriod);
-        
-//     }
-// }
 
 void initialize(void)
 {
@@ -154,12 +129,13 @@ void initialize(void)
         return;
     }
     led4 = 1;
-    while(!data.newPacket){
-        data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
-    }
+    // while(!data.newPacket){
+    //     data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
+    // }
     led4 = 0;
+    serial.initialize(&data, &config);
     controller.initialize(&data, &config.controllerConfig);
-    controllerInterrupt.attach(&flight, config.tickerPeriod);
+    controllerInterrupt.attach(&flight, config.tickerFrequency);
     // imuInterrupt.attach(&imuUpdate,0.001);
     // watchdog.kick(0.05);
 }

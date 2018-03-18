@@ -1,7 +1,5 @@
 #include <mbed.h>
 #include <transceiver.h>
-#include <iostream>
-#include <bitset>
 
 uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
 {
@@ -11,7 +9,6 @@ uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
     uint8_t statRegister = _radio.getStatusRegister();
     if ((statRegister != 0x08) && (statRegister != 0x0e) && (statRegister != 0x0f))
     {
-        std::cout << std::hex << bitset<8>(statRegister) << std::endl;
         return 1;
     }
     _radio.setRfFrequency(2400 + config.radioConfig.channel);
