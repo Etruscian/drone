@@ -20,16 +20,17 @@ int IMU::initialize(configStruct config, dataStruct * data){
         return status;
 
     // Initialize the accelerometer.
-    status = adxl345.initialize(16,1,1,1);
+    status = adxl345.initialize(16, config.imuconfig.adxl345);
     if (status)
         return status|0x10;
 
     // Initialize the magnetometer.
-    status = hmc5883l.initialize();
-    if (status)
-        return status|0x20;
+    // status = hmc5883l.initialize();
+    // if (status)
+    //     return status|0x20;
 
     dataPtr = data;
+    _config = config;
 
     return 0;
 }
@@ -76,72 +77,72 @@ the class variables.
 @return         none
 
 */
-void IMU::calculateQuaternions(void){
-    // The "Down" vector is gained directly from the accelerometer and is then
-    // normalized for calculations.
-//    Serial pc(USBTX, USBRX); // tx, rx
-    rotationMatrix[2][0] = accelerations[0];
-    rotationMatrix[2][1] = accelerations[1];
-    rotationMatrix[2][2] = accelerations[2];
-//    pc.printf("%.4f %.4f %.4f\r\n",rotationMatrix[2][0],rotationMatrix[2][1],rotationMatrix[2][2]);
-    float total = sqrt(rotationMatrix[2][0]*rotationMatrix[2][0] + rotationMatrix[2][1]*rotationMatrix[2][1] + rotationMatrix[2][2]*rotationMatrix[2][2]);
-    rotationMatrix[2][0] = rotationMatrix[2][0]/total;
-    rotationMatrix[2][1] = rotationMatrix[2][1]/total;
-    rotationMatrix[2][2] = rotationMatrix[2][2]/total;
+// void IMU::calculateQuaternions(void){
+//     // The "Down" vector is gained directly from the accelerometer and is then
+//     // normalized for calculations.
+// //    Serial pc(USBTX, USBRX); // tx, rx
+//     rotationMatrix[2][0] = accelerations[0];
+//     rotationMatrix[2][1] = accelerations[1];
+//     rotationMatrix[2][2] = accelerations[2];
+// //    pc.printf("%.4f %.4f %.4f\r\n",rotationMatrix[2][0],rotationMatrix[2][1],rotationMatrix[2][2]);
+//     float total = sqrt(rotationMatrix[2][0]*rotationMatrix[2][0] + rotationMatrix[2][1]*rotationMatrix[2][1] + rotationMatrix[2][2]*rotationMatrix[2][2]);
+//     rotationMatrix[2][0] = rotationMatrix[2][0]/total;
+//     rotationMatrix[2][1] = rotationMatrix[2][1]/total;
+//     rotationMatrix[2][2] = rotationMatrix[2][2]/total;
 
-    // The "East" vector is gained by taking the cross product of the "Down" vector
-    // and the heading. Afterwards, it's normalized.
-    rotationMatrix[1][0] = accelerations[1]* heading[2] - accelerations[2]*heading[1];
-    rotationMatrix[1][1] = accelerations[2]* heading[0] - accelerations[0]*heading[2];
-    rotationMatrix[1][2] = accelerations[0]* heading[1] - accelerations[1]*heading[0];
+//     // The "East" vector is gained by taking the cross product of the "Down" vector
+//     // and the heading. Afterwards, it's normalized.
+//     rotationMatrix[1][0] = accelerations[1]* heading[2] - accelerations[2]*heading[1];
+//     rotationMatrix[1][1] = accelerations[2]* heading[0] - accelerations[0]*heading[2];
+//     rotationMatrix[1][2] = accelerations[0]* heading[1] - accelerations[1]*heading[0];
 
-    total = sqrt(rotationMatrix[1][0]*rotationMatrix[1][0] + rotationMatrix[1][1]*rotationMatrix[1][1] + rotationMatrix[1][2]*rotationMatrix[1][2]);
-    rotationMatrix[1][0] = rotationMatrix[1][0]/total;
-    rotationMatrix[1][1] = rotationMatrix[1][1]/total;
-    rotationMatrix[1][2] = rotationMatrix[1][2]/total;
+//     total = sqrt(rotationMatrix[1][0]*rotationMatrix[1][0] + rotationMatrix[1][1]*rotationMatrix[1][1] + rotationMatrix[1][2]*rotationMatrix[1][2]);
+//     rotationMatrix[1][0] = rotationMatrix[1][0]/total;
+//     rotationMatrix[1][1] = rotationMatrix[1][1]/total;
+//     rotationMatrix[1][2] = rotationMatrix[1][2]/total;
 
-    // Finally, the "North" vector is gained by taking the cross product of the
-    // "Down" vector and the "East" vector. Afterwards, it's normalized.
-    rotationMatrix[0][0] = rotationMatrix[1][1]*accelerations[2] - rotationMatrix[1][2]*accelerations[1];
-    rotationMatrix[0][1] = rotationMatrix[1][2]*accelerations[0] - rotationMatrix[1][0]*accelerations[2];
-    rotationMatrix[0][2] = rotationMatrix[1][0]*accelerations[1] - rotationMatrix[1][1]*accelerations[0];
+//     // Finally, the "North" vector is gained by taking the cross product of the
+//     // "Down" vector and the "East" vector. Afterwards, it's normalized.
+//     rotationMatrix[0][0] = rotationMatrix[1][1]*accelerations[2] - rotationMatrix[1][2]*accelerations[1];
+//     rotationMatrix[0][1] = rotationMatrix[1][2]*accelerations[0] - rotationMatrix[1][0]*accelerations[2];
+//     rotationMatrix[0][2] = rotationMatrix[1][0]*accelerations[1] - rotationMatrix[1][1]*accelerations[0];
 
-    total = sqrt(rotationMatrix[0][0]*rotationMatrix[0][0] + rotationMatrix[0][1]*rotationMatrix[0][1] + rotationMatrix[0][2]*rotationMatrix[0][2]);
-    rotationMatrix[0][0] = rotationMatrix[0][0]/total;
-    rotationMatrix[0][1] = rotationMatrix[0][1]/total;
-    rotationMatrix[0][2] = rotationMatrix[0][2]/total;
+//     total = sqrt(rotationMatrix[0][0]*rotationMatrix[0][0] + rotationMatrix[0][1]*rotationMatrix[0][1] + rotationMatrix[0][2]*rotationMatrix[0][2]);
+//     rotationMatrix[0][0] = rotationMatrix[0][0]/total;
+//     rotationMatrix[0][1] = rotationMatrix[0][1]/total;
+//     rotationMatrix[0][2] = rotationMatrix[0][2]/total;
 
-    // Calculation quaternions from the rotation matrix. First, it is checked if
-    // the trace of the matrix is positive, since not doing  will result
-    // in errors in the calculation (dividing by 0 or imaginary roots).
-    float trace = rotationMatrix[0][0] + rotationMatrix[1][1] + rotationMatrix[2][2];
-    float s;
-    if (trace>0){
-        s = 0.5/ sqrt(trace+1.0);
-        qw = 0.25/s;
-        qx = (rotationMatrix[2][1] - rotationMatrix[1][2])*s;
-        qy = (rotationMatrix[0][2] - rotationMatrix[2][0])*s;
-        qz = (rotationMatrix[1][0] - rotationMatrix[0][1])*s;
-    } else if ((rotationMatrix[0][0]>rotationMatrix[1][1])&&(rotationMatrix[0][0]>rotationMatrix[2][2])){
-        s = 2.0 * sqrt(1+rotationMatrix[0][0] - rotationMatrix[1][1] - rotationMatrix[2][2]);
-        qw = (rotationMatrix[2][1] - rotationMatrix[1][2])/s;
-        qx = 0.25*s;
-        qy = (rotationMatrix[0][1] + rotationMatrix[1][0])/s;
-        qz = (rotationMatrix[0][2] + rotationMatrix[2][0])/s;
-    } else if (rotationMatrix[1][1]>rotationMatrix[2][2]){
-        s = 2.0 * sqrt(1+rotationMatrix[1][1] - rotationMatrix[0][0] - rotationMatrix[2][2]);
-        qw = (rotationMatrix[0][2] - rotationMatrix[2][0])/s;
-        qx = (rotationMatrix[0][1] + rotationMatrix[1][0])/s;
-        qy = 0.25*s;
-        qz = (rotationMatrix[1][2] + rotationMatrix[2][1])/s;
-    } else {
-        s = 2.0 * sqrt(1+rotationMatrix[2][2] - rotationMatrix[0][0] - rotationMatrix[0][0]);
-        qw = (rotationMatrix[1][0] - rotationMatrix[0][1])/s;
-        qx = (rotationMatrix[0][2] + rotationMatrix[2][0])/s;
-        qy = (rotationMatrix[1][2] + rotationMatrix[2][1])/s;
-        qz = 0.25*s;
-    }
-}
+//     // Calculation quaternions from the rotation matrix. First, it is checked if
+//     // the trace of the matrix is positive, since not doing  will result
+//     // in errors in the calculation (dividing by 0 or imaginary roots).
+//     float trace = rotationMatrix[0][0] + rotationMatrix[1][1] + rotationMatrix[2][2];
+//     float s;
+//     if (trace>0){
+//         s = 0.5/ sqrt(trace+1.0);
+//         qw = 0.25/s;
+//         qx = (rotationMatrix[2][1] - rotationMatrix[1][2])*s;
+//         qy = (rotationMatrix[0][2] - rotationMatrix[2][0])*s;
+//         qz = (rotationMatrix[1][0] - rotationMatrix[0][1])*s;
+//     } else if ((rotationMatrix[0][0]>rotationMatrix[1][1])&&(rotationMatrix[0][0]>rotationMatrix[2][2])){
+//         s = 2.0 * sqrt(1+rotationMatrix[0][0] - rotationMatrix[1][1] - rotationMatrix[2][2]);
+//         qw = (rotationMatrix[2][1] - rotationMatrix[1][2])/s;
+//         qx = 0.25*s;
+//         qy = (rotationMatrix[0][1] + rotationMatrix[1][0])/s;
+//         qz = (rotationMatrix[0][2] + rotationMatrix[2][0])/s;
+//     } else if (rotationMatrix[1][1]>rotationMatrix[2][2]){
+//         s = 2.0 * sqrt(1+rotationMatrix[1][1] - rotationMatrix[0][0] - rotationMatrix[2][2]);
+//         qw = (rotationMatrix[0][2] - rotationMatrix[2][0])/s;
+//         qx = (rotationMatrix[0][1] + rotationMatrix[1][0])/s;
+//         qy = 0.25*s;
+//         qz = (rotationMatrix[1][2] + rotationMatrix[2][1])/s;
+//     } else {
+//         s = 2.0 * sqrt(1+rotationMatrix[2][2] - rotationMatrix[0][0] - rotationMatrix[0][0]);
+//         qw = (rotationMatrix[1][0] - rotationMatrix[0][1])/s;
+//         qx = (rotationMatrix[0][2] + rotationMatrix[2][0])/s;
+//         qy = (rotationMatrix[1][2] + rotationMatrix[2][1])/s;
+//         qz = 0.25*s;
+//     }
+// }
 
 /*
 Updates the dataPtr. 
@@ -179,14 +180,13 @@ void IMU::update(void){
 }
 
 void IMU::estimator(float * roll, float * pitch){
-    float dt = 0.01;
-    *roll -= ((float)velocities[0])*dt;
-    *pitch += ((float)velocities[1])*dt;
+    *roll -= ((float)velocities[0])*1.0/_config.tickerFrequency;
+    *pitch += ((float)velocities[1])*1.0/_config.tickerFrequency;
 
     //float forceMagnitudeApprox = abs(accelerations[0]) + abs(accelerations[1]) + abs(accelerations[2]);
 
     float rollAcc = -atan2f(accelerations[1],accelerations[2])*180 / M_PI;
-    *roll = *roll * 0.90 + rollAcc * 0.1;
+    *roll = *roll * 0.999 + rollAcc * 0.001;
     float pitchAcc = -atan2f(accelerations[0],accelerations[2])*180 / M_PI;
-    *pitch = *pitch * 0.90 + pitchAcc * 0.1;
+    *pitch = *pitch * 0.999 + pitchAcc * 0.001;
 }

@@ -2,6 +2,7 @@
 #define ADXL345_H
 
 #include <mbed.h>
+#include "config.hpp"
 
 class ADXL345{
     private:
@@ -39,7 +40,7 @@ class ADXL345{
         uint8_t convertGRange();
 
     public:
-        int initialize(uint16_t gRangeInput, float xFilter, float yFilter, float zFilter);
+        int initialize(uint16_t gRangeInput, ADXL345ConfigStruct config);
             ADXL345(): i2c(p28,p27){}
         int read(float * fx, float * fy, float * fz);
         int selfTest(void);

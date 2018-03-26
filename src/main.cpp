@@ -1,5 +1,5 @@
 #include <mbed.h>
-// #include "Watchdog.hpp"
+#include "Watchdog.hpp"
 #include <config.hpp>
 #include "iniparser.h"
 #include "serialHandler.hpp"
@@ -7,7 +7,7 @@
 #include "IMU.h"
 #include "controller.hpp"
 
-// Watchdog watchdog;
+Watchdog watchdog;
 
 Serial pc(USBTX,USBRX);
 SerialHandler serial;
@@ -17,7 +17,7 @@ dataStruct data;
 configStruct config;
 Transceiver radio(p5, p6, p7, p8, p9);
 InterruptIn radioInterrupt(p10);
-Ticker controllerInterrupt, imuInterrupt;
+Ticker controllerInterrupt, imuInterrupt, ledTicker;
 Controller controller(p24, p22, p21, p23);
 IMU imu;
 
@@ -44,13 +44,13 @@ void loadConfig(void){
     const char ** keysAcroPtr = (const char **) &keysAcro;
     keysAcroPtr = iniparser_getseckeys(dir, "acromode", keysAcroPtr);
     for (int i = 0; i<=2; i++){
-        config.controllerConfig.acroModeConfig.Kp[i] = iniparser_getdouble(dir, (keysAcro[i]),0);
+        config.controllerConfig.acroModeConfig.Kp[i] = (float)iniparser_getdouble(dir, (keysAcro[i]),0);
     }
     for (int i = 0; i<=2; i++){
-        config.controllerConfig.acroModeConfig.Ki[i] = iniparser_getdouble(dir, (keysAcro[i+3]),0);
+        config.controllerConfig.acroModeConfig.Ki[i] = (float)iniparser_getdouble(dir, (keysAcro[i+3]),0);
     }
     for (int i = 0; i<=2; i++){
-        config.controllerConfig.acroModeConfig.Kd[i] = iniparser_getdouble(dir, (keysAcro[i+6]),0);
+        config.controllerConfig.acroModeConfig.Kd[i] = (float)iniparser_getdouble(dir, (keysAcro[i+6]),0);
     }
 
     // Read config for stabilizing mode
@@ -58,13 +58,13 @@ void loadConfig(void){
     const char ** keysStabilizingPtr = (const char **) &keysStabilizing;
     keysStabilizingPtr = iniparser_getseckeys(dir, "stabilizingmode", keysStabilizingPtr);
     for (int i = 0; i<=2; i++){
-        config.controllerConfig.stabilizingModeConfig.Kp[i] = iniparser_getdouble(dir, (keysStabilizing[i]),0);
+        config.controllerConfig.stabilizingModeConfig.Kp[i] = (float)iniparser_getdouble(dir, (keysStabilizing[i]),0);
     }
     for (int i = 0; i<=2; i++){
-        config.controllerConfig.stabilizingModeConfig.Ki[i] = iniparser_getdouble(dir, (keysStabilizing[i+3]),0);
+        config.controllerConfig.stabilizingModeConfig.Ki[i] = (float)iniparser_getdouble(dir, (keysStabilizing[i+3]),0);
     }
     for (int i = 0; i<=2; i++){
-        config.controllerConfig.stabilizingModeConfig.Kd[i] = iniparser_getdouble(dir, (keysStabilizing[i+6]),0);
+        config.controllerConfig.stabilizingModeConfig.Kd[i] = (float)iniparser_getdouble(dir, (keysStabilizing[i+6]),0);
     }
 
     // Read config for motor direction compensation
@@ -78,17 +78,17 @@ void loadConfig(void){
     }
 
     // Reading filter values
-    config.imuconfig.itg3200.a = iniparser_getdouble(dir, "itg3200:a",0);
-    config.imuconfig.itg3200.b = iniparser_getdouble(dir, "itg3200:b",0);
-    config.imuconfig.itg3200.c = iniparser_getdouble(dir, "itg3200:c",0);
+    config.imuconfig.itg3200.a = (float)iniparser_getdouble(dir, "itg3200:a",0);
+    config.imuconfig.itg3200.b = (float)iniparser_getdouble(dir, "itg3200:b",0);
+    config.imuconfig.itg3200.c = (float)iniparser_getdouble(dir, "itg3200:c",0);
 
-    config.imuconfig.hmc5883l.a = iniparser_getdouble(dir, "hmc5883l:a",0);
-    config.imuconfig.hmc5883l.b = iniparser_getdouble(dir, "hmc5883l:b",0);
-    config.imuconfig.hmc5883l.c = iniparser_getdouble(dir, "hmc5883l:c",0);
+    config.imuconfig.hmc5883l.a = (float)iniparser_getdouble(dir, "hmc5883l:a",0);
+    config.imuconfig.hmc5883l.b = (float)iniparser_getdouble(dir, "hmc5883l:b",0);
+    config.imuconfig.hmc5883l.c = (float)iniparser_getdouble(dir, "hmc5883l:c",0);
 
-    config.imuconfig.adxl345.a = iniparser_getdouble(dir, "adxl345:a",0);
-    config.imuconfig.adxl345.b = iniparser_getdouble(dir, "adxl345:b",0);
-    config.imuconfig.adxl345.c = iniparser_getdouble(dir, "adxl345:c",0);
+    config.imuconfig.adxl345.a = (float)iniparser_getdouble(dir, "adxl345:a",0);
+    config.imuconfig.adxl345.b = (float)iniparser_getdouble(dir, "adxl345:b",0);
+    config.imuconfig.adxl345.c = (float)iniparser_getdouble(dir, "adxl345:c",0);
 
     config.tickerFrequency = (uint16_t) iniparser_getint(dir, "misc:tickerfrequency",500);
     iniparser_freedict(dir);
@@ -106,6 +106,10 @@ void flight(void)
     data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
 }
 
+void ledUpdate(void){
+    led4 = 1-led4;
+}
+
 void initialize(void)
 {
     loadConfig();
@@ -113,6 +117,7 @@ void initialize(void)
     led2 = 0;
     led3 = 0;
     led4 = 0;
+    serial.initialize(&data, &config); 
     radioPower=1;
     wait(1);
     status = radio.initialize(config, &data);
@@ -128,16 +133,18 @@ void initialize(void)
         led2 = 1;
         return;
     }
-    led4 = 1;
-    // while(!data.newPacket){
-    //     data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
-    // }
+    
+    ledTicker.attach(&ledUpdate, 0.5);
+    while(!data.newPacket){
+        data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
+    }
+    ledTicker.detach();
     led4 = 0;
-    serial.initialize(&data, &config);
+    
     controller.initialize(&data, &config.controllerConfig);
-    controllerInterrupt.attach(&flight, config.tickerFrequency);
+    controllerInterrupt.attach(&flight, 1.0/config.tickerFrequency);
     // imuInterrupt.attach(&imuUpdate,0.001);
-    // watchdog.kick(0.05);
+    // watchdog.kick(0.1);
 }
 
 int main()

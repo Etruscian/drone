@@ -15,7 +15,6 @@ class ITG3200{
         static const int  REG_DATA_Z = 0x21;
         static const int  REG_POWER_MANAGEMENT = 0x3E;
 
-
         static const int  SAMPLE_RATE_8KHZ_256 = 0x00;
         static const int  SAMPLE_RATE_1KHZ_188 = 0x01;
         static const int  SAMPLE_RATE_1KHZ_98 = 0x02;
@@ -38,6 +37,9 @@ class ITG3200{
         static const int  RESET_OFFSET = 0x07;
 
         static const float scaleFactor = 14.375;
+        static const float rollOffset = -3.6;
+        static const float pitchOffset = 0.120;
+        static const float yawOffset = -0.880;
 
         char buffer[8];
         float x,y,z;

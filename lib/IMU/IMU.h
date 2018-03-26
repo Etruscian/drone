@@ -13,14 +13,15 @@ class IMU
     ADXL345 adxl345;
     HMC5883L hmc5883l;
     dataStruct *dataPtr;
+    configStruct _config;
 
     float accelerations[3], velocities[3], heading[3], rotationMatrix[3][3];
     float temp;
-    float qw, qx, qy, qz;
+    // float qw, qx, qy, qz;
     float estimated_roll, estimated_pitch, k;
 
     void getReadings(void);
-    void calculateQuaternions(void);
+    // void calculateQuaternions(void);
 
   public:
     int initialize(configStruct config, dataStruct *data);

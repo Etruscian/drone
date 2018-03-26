@@ -5,12 +5,12 @@
 
 struct remoteStruct
 {
-    float throttle;
-    float roll;
-    float pitch;
-    float yaw;
-    bool signalLost;
-    uint16_t missedPackets;
+    volatile float throttle;
+    volatile float roll;
+    volatile float pitch;
+    volatile float yaw;
+    volatile bool signalLost;
+    volatile uint16_t missedPackets;
 
     remoteStruct() : throttle(0),
                      roll(0),
@@ -46,7 +46,7 @@ struct dataStruct
     bool armMotor;
     bool newPacket;
 
-    dataStruct() : acroMode(true),
+    dataStruct() : acroMode(false),
                    armMotorRequested(false),
                    armMotor(false),
                    newPacket(false)
@@ -77,7 +77,7 @@ struct controllerConfigStruct
     acroModeStruct acroModeConfig;
     stabilizingModeStruct stabilizingModeConfig;
     int8_t signs[4][3];
-    int8_t prescaler[3];
+    int16_t prescaler[3];
 };
 
 struct ITG3200ConfigStruct

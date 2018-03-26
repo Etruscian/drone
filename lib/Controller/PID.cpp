@@ -20,7 +20,7 @@ float PID::calculate(float setpoint, float currentValue){
 
     _errorDerivativeArray[pos] = _error;
 
-    pos++;
+    pos = (pos + 1) & 0x1F;
 
     _output = _error * _Kp + _errorIntegral * _Ki + _errorDerivative * _Kd;
 

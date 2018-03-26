@@ -1,5 +1,6 @@
 #include <mbed.h>
 #include <transceiver.h>
+#include <iostream>
 
 uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
 {
@@ -71,18 +72,19 @@ void Transceiver::interruptHandler(void){
     if (status & 64)
     { // RX received
         (*dataPtr).newPacket = true;
-        _radio.read((status & 14) >> 1, rxBuffer, transferSize);
+        _radio.read(0, rxBuffer, transferSize);
         _radio.setRegister(0x07, 64);
         send(0,(char * )(*dataPtr).batteryLevel.u,4);
-        for (int i = 0; i<15;i++){
+        for (int i = 0; i<=15;i++){
             rxData[i/4].c[i & 3] = rxBuffer[i];
         }
         (*dataPtr).remote.throttle = rxData[0].f;
         (*dataPtr).remote.roll = rxData[1].f * prescaler[0];
         (*dataPtr).remote.pitch = rxData[2].f * prescaler[1];
         (*dataPtr).remote.yaw = rxData[3].f * prescaler[2];
-        (*dataPtr).armMotor =((bool)rxBuffer[16] >> 1) & 0x01;
-        (*dataPtr).acroMode = (bool)rxBuffer[16] & 0x01;
+        (*dataPtr).armMotor = (bool)((rxBuffer[16] >> 1) & 0x01);
+        (*dataPtr).acroMode = false;//(bool)(rxBuffer[16] & 0x01);
+        _radio.flushRX();
     }
     
 }

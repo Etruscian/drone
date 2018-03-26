@@ -20,23 +20,25 @@ void Controller::initialize(dataStruct *data, controllerConfigStruct *controller
 
 void Controller::update(void)
 {
-    
     if (!(*dataPtr).armMotor || ((*dataPtr).remote.throttle<=0.05 ))
     {
         escController[0].update(0);
         escController[1].update(0);
         escController[2].update(0);
         escController[3].update(0);
+        pidRoll.reset();
+        pidPitch.reset();
+        pidYaw.reset();
         return;
     }
-    std::cout << (*dataPtr).remote.throttle << std::endl;
+    
     if ((*dataPtr).acroMode && (controllerMode == STABILIZE))
     {
         controllerMode = ACRO;
         updateParameters();
     }
 
-    if (!(*dataPtr).acroMode && (controllerMode == ACRO))
+    if (!(*dataPtr).acroMode && (controllerMode == ACRO))                                            
     {
         controllerMode = STABILIZE;
         updateParameters();
@@ -54,34 +56,14 @@ void Controller::update(void)
     roll = roll * (1-0.1) + rollRemote * 0.1;
     pitch = pitch * (1-0.1) + pitchRemote * 0.1;
     yaw = yaw * (1-0.1) + yawRemote * 0.1;
-
-    // if (controllerMode == STABILIZE)
-    // {
-    //     rollError = roll - (*dataPtr).imu.roll;
-    //     rollVelocityError = -(*dataPtr).imu.rollVelocity;
-    //     pitchError = pitch - (*dataPtr).imu.pitch;
-    //     pitchVelocityError = -(*dataPtr).imu.pitchVelocity;
-    // }
-
-    // if (controllerMode == ACRO)
-    // {
-    //     rollError = roll - (*dataPtr).imu.rollVelocity;
-    //     pitchError = pitch - (*dataPtr).imu.pitchVelocity;
-    // }
-
-    // yawError = yaw - (*dataPtr).imu.yawVelocity;
+    // std::cout << (int16_t)(pidRoll.calculate(roll, (*dataPtr).imu.roll, 0, (*dataPtr).imu.rollVelocity)*1000) << '\t' <<(int16_t)(pidYaw.calculate(yaw, (*dataPtr).imu.yawVelocity)*1000) <<std::endl;
 
     for (int i = 0; i <= 3; i++)
     {
-        escController[i].update(throttle * 125 +  (*controllerConfigPtr).signs[i][0] * pidRoll.calculate(roll, (*dataPtr).imu.roll, 0, (*dataPtr).imu.rollVelocity) + \
-                                            (*controllerConfigPtr).signs[i][1] * pidPitch.calculate(pitch, (*dataPtr).imu.pitch, 0, (*dataPtr).imu.pitchVelocity) +\
-                                            (*controllerConfigPtr).signs[i][2] * pidYaw.calculate(yaw, (*dataPtr).imu.yawVelocity));
-        // rollControlValue = (*controllerConfigPtr).signs[i][0] * (Kp[0] * rollError + Kd[0] * rollVelocityError);
-        // pitchControlValue = (*controllerConfigPtr).signs[i][1] * (Kp[1] * pitchError + Kd[1] * pitchVelocityError);
-        // yawControlValue = (*controllerConfigPtr).signs[i][2] * Kp[2] * yawError;
-        // setpoint[i] = throttle * 125.0 + rollControlValue + pitchControlValue + yawControlValue;
-        // escController[i].update(setpoint[i]);
-        // escController[i].update(throttle*125);
+        float setpoint = throttle * 125 +  (*controllerConfigPtr).signs[i][0] * pidRoll.calculate(roll, (*dataPtr).imu.roll, 0, (*dataPtr).imu.rollVelocity) + \
+                                            (*controllerConfigPtr).signs[i][1] * pidPitch.calculate(pitch, (*dataPtr).imu.pitch, 0, (*dataPtr).imu.pitchVelocity) + \
+                                            (*controllerConfigPtr).signs[i][2] * pidYaw.calculate(yaw, (*dataPtr).imu.yawVelocity);
+        escController[i].update(setpoint);
     }
 }
 
@@ -96,9 +78,9 @@ void Controller::updateParameters(void)
             Ki[i] = (*controllerConfigPtr).acroModeConfig.Ki[i];
             Kd[i] = (*controllerConfigPtr).acroModeConfig.Kd[i];
         }
-        pidRoll.initialize(Kp[0], Ki[0], Kd[0], 0.001, 30.0, -30.0);
-        pidPitch.initialize(Kp[1], Ki[1], Kd[1], 0.001, 30.0, -30.0);
-        pidYaw.initialize(Kp[2], Ki[2], Kd[2], 0.001, 30.0, -30.0);
+        pidRoll.initialize(Kp[0], Ki[0], Kd[0], 0.002, 10.0, -10.0);
+        pidPitch.initialize(Kp[1], Ki[1], Kd[1], 0.002, 10.0, -10.0);
+        pidYaw.initialize(Kp[2], Ki[2], Kd[2], 0.002, 10.0, -10.0);
         break;
 
     case STABILIZE:
@@ -108,9 +90,9 @@ void Controller::updateParameters(void)
             Ki[i] = (*controllerConfigPtr).stabilizingModeConfig.Ki[i];
             Kd[i] = (*controllerConfigPtr).stabilizingModeConfig.Kd[i];
         }
-        pidRoll.initialize(Kp[0], Ki[0], Kd[0], 0.001, 30.0, -30.0);
-        pidPitch.initialize(Kp[1], Ki[1], Kd[1], 0.001, 30.0, -30.0);
-        pidYaw.initialize(Kp[2], Ki[2], Kd[2], 0.001, 30.0, -30.0);
+        pidRoll.initialize(Kp[0], Ki[0], Kd[0], 0.002, 10.0, -10.0);
+        pidPitch.initialize(Kp[1], Ki[1], Kd[1], 0.002, 10.0, -10.0);
+        pidYaw.initialize(Kp[2], Ki[2], Kd[2], 0.002, 10.0, -10.0);
         break;
     }
 }
