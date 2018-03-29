@@ -37,28 +37,6 @@ float PID::calculate(float setpoint, float currentValue){
     return _output;
 }
 
-float PID::calculate(float setpoint, float currentValue, float velocitySetpoint, float currentVelocity){
-    _error = setpoint - currentValue;
-
-    _errorIntegral = _error * _dt + _errorIntegrated;
-
-    _errorDerivative = velocitySetpoint - currentVelocity;
-
-    _output = _error * _Kp + _errorIntegral * _Ki + _errorDerivative * _Kd;
-
-    if (_output > _max){
-        _output = _max;
-    }
-    else if (_output < _min){
-        _output = _min;
-    }
-    else {
-        _errorIntegrated = _errorIntegral;
-    }
-
-    return _output;
-}
-
 void PID::reset(void){
     _errorIntegrated = 0;
 }

@@ -34,9 +34,12 @@ void loadConfig(void){
     config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",17);
 
     // Read remote prescalers
-    config.controllerConfig.prescaler[0] = iniparser_getint(dir, "controller:prescaler_roll",0);
-    config.controllerConfig.prescaler[1] = iniparser_getint(dir, "controller:prescaler_pitch",0);
-    config.controllerConfig.prescaler[2] = iniparser_getint(dir, "controller:prescaler_yaw",0);
+    config.controllerConfig.prescaler[0] = (float)iniparser_getdouble(dir, "controller:prescaler_roll",0);
+    config.controllerConfig.prescaler[1] = (float)iniparser_getdouble(dir, "controller:prescaler_pitch",0);
+    config.controllerConfig.prescaler[2] = (float)iniparser_getdouble(dir, "controller:prescaler_yaw",0);
+    config.controllerConfig.imuPrescaler[0] = (float)iniparser_getdouble(dir, "controller:prescaler_roll_imu",0);
+    config.controllerConfig.imuPrescaler[1] = (float)iniparser_getdouble(dir, "controller:prescaler_pitch_imu",0);
+    config.controllerConfig.imuPrescaler[2] = (float)iniparser_getdouble(dir, "controller:prescaler_yaw_imu",0);
 
 
     // Read config for ACRO mode

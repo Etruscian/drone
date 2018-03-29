@@ -77,7 +77,8 @@ struct controllerConfigStruct
     acroModeStruct acroModeConfig;
     stabilizingModeStruct stabilizingModeConfig;
     int8_t signs[4][3];
-    int16_t prescaler[3];
+    float prescaler[3];
+    float imuPrescaler[3];
 };
 
 struct ITG3200ConfigStruct

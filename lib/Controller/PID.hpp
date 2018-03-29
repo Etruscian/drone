@@ -7,7 +7,6 @@ class PID{
     public:
         void initialize(float Kp, float Ki, float Kd, float dt, float max, float min);
         float calculate(float setpoint, float currentValue);
-        float calculate(float setpoint, float currentValue, float velocitySetpoint, float currentVelocity);
         void reset(void);
 
     private:

@@ -18,7 +18,7 @@ class Transceiver{
         uint8_t movingAvg(uint8_t *ptrArrNumbers, uint16_t *ptrSum, uint8_t pos, uint16_t len, uint8_t nextNum);
         uint8_t signalStrengthArray[80];
         uint16_t sum;
-        int8_t prescaler[3];
+        float prescaler[3];
         volatile uint8_t signalStrength;
         uint16_t signalLostTimeout;
 

@@ -36,10 +36,10 @@ class ITG3200{
 
         static const int  RESET_OFFSET = 0x07;
 
-        static const float scaleFactor = 14.375;
+        static const float scaleFactor = 16.3835;
         static const float rollOffset = -3.6;
         static const float pitchOffset = 0.120;
-        static const float yawOffset = -0.880;
+        static const float yawOffset = -0.760;
 
         char buffer[8];
         float x,y,z;

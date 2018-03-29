@@ -162,13 +162,14 @@ void IMU::update(void){
     if ((*dataPtr).acroMode){
         (*dataPtr).imu.rollVelocity = -velocities[0];
         (*dataPtr).imu.pitchVelocity = velocities[1];
-        (*dataPtr).imu.yawVelocity = -velocities[2];
+        (*dataPtr).imu.yawVelocity = velocities[2];
     }
     else {
         estimator(&(*dataPtr).imu.roll, &(*dataPtr).imu.pitch);
         (*dataPtr).imu.rollVelocity = -velocities[0];
         (*dataPtr).imu.pitchVelocity = velocities[1];
         (*dataPtr).imu.yawVelocity = velocities[2];
+        // std::cout << (int32_t)(velocities[2]*1000) << std::endl;
         // // Calculate quaternions from the raw values.
         // calculateQuaternions();
 
