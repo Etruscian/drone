@@ -9,7 +9,7 @@ class SerialHandler
     {
         _data = data;
         _config = config;
-        _connection.baud(115200);
+        _connection.baud(128000);
         _connection.attach(callback(this, &SerialHandler::rxInterruptHandler), Serial::RxIrq);
         _connection.putc('a');
         // _connection.attach(callback(this, &SerialHandler::txInterruptHandler), Serial::TxIrq);

@@ -152,8 +152,8 @@ int ADXL345::read(float * fx, float * fy, float * fz){
     z = ((float)((int16_t)(buffer[5]<<8)+buffer[4]))*gRange/(512.0);
 
     // filter data
-    *fx = x * alphaX + Fx * (1.0-alphaX);
-    *fy = y * alphaY + Fy * (1.0-alphaY);
+    *fx = -x * alphaX + Fx * (1.0-alphaX);
+    *fy = -y * alphaY + Fy * (1.0-alphaY);
     *fz = z * alphaZ + Fz * (1.0-alphaZ);
 
     // store filtered data for next calculation

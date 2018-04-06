@@ -56,7 +56,7 @@ void Controller::update(void)
     roll = roll * (1-0.1) + rollRemote * 0.1;
     pitch = pitch * (1-0.1) + pitchRemote * 0.1;
     yaw = yaw * (1-0.1) + yawRemote * 0.1;
-    // std::cout << (int16_t)(pidRoll.calculate(roll, (*dataPtr).imu.roll*(*controllerConfigPtr).imuPrescaler[0], 0, (*dataPtr).imu.rollVelocity)*1000) << '\t' <<(int16_t)(pidYaw.calculate(yaw, (*dataPtr).imu.yawVelocity)*1000) <<std::endl;
+    // std::cout << (int16_t)(pidRoll.calculate(roll, (*dataPtr).imu.roll*(*controllerConfigPtr).imuPrescaler[0])*1000) << '\t' <<(int16_t)(pidPitch.calculate(pitch, (*dataPtr).imu.pitch*(*controllerConfigPtr).imuPrescaler[1])*1000) <<std::endl;
 
     for (int i = 0; i <= 3; i++)
     {
@@ -78,9 +78,9 @@ void Controller::updateParameters(void)
             Ki[i] = (*controllerConfigPtr).acroModeConfig.Ki[i];
             Kd[i] = (*controllerConfigPtr).acroModeConfig.Kd[i];
         }
-        pidRoll.initialize(Kp[0], Ki[0], Kd[0], 0.002, 50.0, -50.0);
-        pidPitch.initialize(Kp[1], Ki[1], Kd[1], 0.002, 50.0, -50.0);
-        pidYaw.initialize(Kp[2], Ki[2], Kd[2], 0.002, 50.0, -50.0);
+        pidRoll.initialize(Kp[0], Ki[0], Kd[0], 0.001, 50.0, -50.0);
+        pidPitch.initialize(Kp[1], Ki[1], Kd[1], 0.001, 50.0, -50.0);
+        pidYaw.initialize(Kp[2], Ki[2], Kd[2], 0.001, 50.0, -50.0);
         break;
 
     case STABILIZE:
@@ -90,9 +90,9 @@ void Controller::updateParameters(void)
             Ki[i] = (*controllerConfigPtr).stabilizingModeConfig.Ki[i];
             Kd[i] = (*controllerConfigPtr).stabilizingModeConfig.Kd[i];
         }
-        pidRoll.initialize(Kp[0], Ki[0], Kd[0], 0.002, 30.0, -30.0);
-        pidPitch.initialize(Kp[1], Ki[1], Kd[1], 0.002, 30.0, -30.0);
-        pidYaw.initialize(Kp[2], Ki[2], Kd[2], 0.002, 50.0, -50.0);
+        pidRoll.initialize(Kp[0], Ki[0], Kd[0], 0.001, 50.0, -50.0);
+        pidPitch.initialize(Kp[1], Ki[1], Kd[1], 0.001, 50.0, -50.0);
+        pidYaw.initialize(Kp[2], Ki[2], Kd[2], 0.001, 50.0, -50.0);
         break;
     }
 }

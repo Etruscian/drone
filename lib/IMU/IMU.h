@@ -5,6 +5,7 @@
 #include "ITG3200.h"
 #include "HMC5883L.h"
 #include "config.hpp"
+#include "kalman.hpp"
 
 class IMU
 {
@@ -14,6 +15,8 @@ class IMU
     HMC5883L hmc5883l;
     dataStruct *dataPtr;
     configStruct _config;
+    Kalman kalman;
+    float Pxx, Pxv, Pvv;
 
     float accelerations[3], velocities[3], heading[3], rotationMatrix[3][3];
     float temp;
