@@ -133,6 +133,7 @@ void initialize(void)
     status = imu.initialize(config, &data);
     if (status)
     {
+        pc.printf("%u\n", status);
         led2 = 1;
         return;
     }

@@ -13,6 +13,7 @@ class ADXL345{
         static const int REG_DATA_X = 0x32;
         static const int REG_DATA_Y = 0x34;
         static const int REG_DATA_Z = 0x36;
+        static const int REG_FIFO_CTL = 0x38;
 
         static const int CMD_MEASUREMENT_MODE = 0x08;
         static const int CMD_DATA_RATE_6_25HZ = 0x06;
@@ -27,6 +28,7 @@ class ADXL345{
         static const int CMD_DATA_RATE_3200HZ = 0x0F;
         
         static const int CMD_DATA_FORMAT_FULL_RES_16G = 0x0B;
+        static const int CMD_FIFO_STREAM = 0x02 << 5;
         static const int CMD_SELF_TEST = 0x80;
 
         char buffer[6];

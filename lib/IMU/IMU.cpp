@@ -69,88 +69,8 @@ void IMU::getReadings(void){
 }
 
 /*
-Calculates the quaternions using the raw values.
-It first generates the rotation matrix from the raw values.
-Finally, it calculates the quaternions and stores them in the class variables.
-the class variables.
-
-@param          none
-@return         none
-
-*/
-// void IMU::calculateQuaternions(void){
-//     // The "Down" vector is gained directly from the accelerometer and is then
-//     // normalized for calculations.
-// //    Serial pc(USBTX, USBRX); // tx, rx
-//     rotationMatrix[2][0] = accelerations[0];
-//     rotationMatrix[2][1] = accelerations[1];
-//     rotationMatrix[2][2] = accelerations[2];
-// //    pc.printf("%.4f %.4f %.4f\r\n",rotationMatrix[2][0],rotationMatrix[2][1],rotationMatrix[2][2]);
-//     float total = sqrt(rotationMatrix[2][0]*rotationMatrix[2][0] + rotationMatrix[2][1]*rotationMatrix[2][1] + rotationMatrix[2][2]*rotationMatrix[2][2]);
-//     rotationMatrix[2][0] = rotationMatrix[2][0]/total;
-//     rotationMatrix[2][1] = rotationMatrix[2][1]/total;
-//     rotationMatrix[2][2] = rotationMatrix[2][2]/total;
-
-//     // The "East" vector is gained by taking the cross product of the "Down" vector
-//     // and the heading. Afterwards, it's normalized.
-//     rotationMatrix[1][0] = accelerations[1]* heading[2] - accelerations[2]*heading[1];
-//     rotationMatrix[1][1] = accelerations[2]* heading[0] - accelerations[0]*heading[2];
-//     rotationMatrix[1][2] = accelerations[0]* heading[1] - accelerations[1]*heading[0];
-
-//     total = sqrt(rotationMatrix[1][0]*rotationMatrix[1][0] + rotationMatrix[1][1]*rotationMatrix[1][1] + rotationMatrix[1][2]*rotationMatrix[1][2]);
-//     rotationMatrix[1][0] = rotationMatrix[1][0]/total;
-//     rotationMatrix[1][1] = rotationMatrix[1][1]/total;
-//     rotationMatrix[1][2] = rotationMatrix[1][2]/total;
-
-//     // Finally, the "North" vector is gained by taking the cross product of the
-//     // "Down" vector and the "East" vector. Afterwards, it's normalized.
-//     rotationMatrix[0][0] = rotationMatrix[1][1]*accelerations[2] - rotationMatrix[1][2]*accelerations[1];
-//     rotationMatrix[0][1] = rotationMatrix[1][2]*accelerations[0] - rotationMatrix[1][0]*accelerations[2];
-//     rotationMatrix[0][2] = rotationMatrix[1][0]*accelerations[1] - rotationMatrix[1][1]*accelerations[0];
-
-//     total = sqrt(rotationMatrix[0][0]*rotationMatrix[0][0] + rotationMatrix[0][1]*rotationMatrix[0][1] + rotationMatrix[0][2]*rotationMatrix[0][2]);
-//     rotationMatrix[0][0] = rotationMatrix[0][0]/total;
-//     rotationMatrix[0][1] = rotationMatrix[0][1]/total;
-//     rotationMatrix[0][2] = rotationMatrix[0][2]/total;
-
-//     // Calculation quaternions from the rotation matrix. First, it is checked if
-//     // the trace of the matrix is positive, since not doing  will result
-//     // in errors in the calculation (dividing by 0 or imaginary roots).
-//     float trace = rotationMatrix[0][0] + rotationMatrix[1][1] + rotationMatrix[2][2];
-//     float s;
-//     if (trace>0){
-//         s = 0.5/ sqrt(trace+1.0);
-//         qw = 0.25/s;
-//         qx = (rotationMatrix[2][1] - rotationMatrix[1][2])*s;
-//         qy = (rotationMatrix[0][2] - rotationMatrix[2][0])*s;
-//         qz = (rotationMatrix[1][0] - rotationMatrix[0][1])*s;
-//     } else if ((rotationMatrix[0][0]>rotationMatrix[1][1])&&(rotationMatrix[0][0]>rotationMatrix[2][2])){
-//         s = 2.0 * sqrt(1+rotationMatrix[0][0] - rotationMatrix[1][1] - rotationMatrix[2][2]);
-//         qw = (rotationMatrix[2][1] - rotationMatrix[1][2])/s;
-//         qx = 0.25*s;
-//         qy = (rotationMatrix[0][1] + rotationMatrix[1][0])/s;
-//         qz = (rotationMatrix[0][2] + rotationMatrix[2][0])/s;
-//     } else if (rotationMatrix[1][1]>rotationMatrix[2][2]){
-//         s = 2.0 * sqrt(1+rotationMatrix[1][1] - rotationMatrix[0][0] - rotationMatrix[2][2]);
-//         qw = (rotationMatrix[0][2] - rotationMatrix[2][0])/s;
-//         qx = (rotationMatrix[0][1] + rotationMatrix[1][0])/s;
-//         qy = 0.25*s;
-//         qz = (rotationMatrix[1][2] + rotationMatrix[2][1])/s;
-//     } else {
-//         s = 2.0 * sqrt(1+rotationMatrix[2][2] - rotationMatrix[0][0] - rotationMatrix[0][0]);
-//         qw = (rotationMatrix[1][0] - rotationMatrix[0][1])/s;
-//         qx = (rotationMatrix[0][2] + rotationMatrix[2][0])/s;
-//         qy = (rotationMatrix[1][2] + rotationMatrix[2][1])/s;
-//         qz = 0.25*s;
-//     }
-// }
-
-/*
 Updates the dataPtr. 
-It starts with updating the raw values. Then calculates the quaternions from
-that data and finally calculates Euler angles from the quaterions.
-Still has to be seen if we need Euler angles or if we can control using
-quaternions.
+It starts with updating the raw values.
 
 @param          none
 @return         none
@@ -160,33 +80,21 @@ void IMU::update(void){
     // Get raw values from devices.
     getReadings();
 
-    if ((*dataPtr).acroMode){
-        (*dataPtr).imu.rollVelocity = velocities[0];
-        (*dataPtr).imu.pitchVelocity = velocities[1];
-        (*dataPtr).imu.yawVelocity = velocities[2];
-    }
-    else {
+    if (!(*dataPtr).acroMode){
         estimator(&(*dataPtr).imu.roll, &(*dataPtr).imu.pitch);
-        (*dataPtr).imu.rollVelocity = velocities[0];
-        (*dataPtr).imu.pitchVelocity = velocities[1];
-        (*dataPtr).imu.yawVelocity = velocities[2];
-        // std::cout << (int32_t)((*dataPtr).imu.yawVelocity*1000) << std::endl;
-        // // Calculate quaternions from the raw values.
-        // calculateQuaternions();
-
-        // // Calculate Euler angles from quaternions.
-        // (*dataPtr).imu.roll = atan2(2*(qw*qx+qy*qz),1-2*(qx*qx+qy*qy))/3.14159265359*180;
-        // (*dataPtr).imu.roll = asin(2*(qw*qy-qz*qx))/3.14159265359*180;
-        // (*dataPtr).imu.yaw = atan2(2*(qw*qz+qx*qy),1-2*(qy*qy+qz*qz))/3.14159265359*180;
     }
+
+    (*dataPtr).imu.rollVelocity = velocities[0];
+    (*dataPtr).imu.pitchVelocity = velocities[1];
+    (*dataPtr).imu.yawVelocity = velocities[2];
 }
 
 void IMU::estimator(float * roll, float * pitch){
-    *roll += ((float)velocities[0])/_config.tickerFrequency;
-    *pitch -= ((float)velocities[1])/_config.tickerFrequency;
+    *roll += (velocities[0])/_config.tickerFrequency;
+    *pitch += (velocities[1])/_config.tickerFrequency;
     // std::cout << (int32_t)((*roll)*1000) << '\t';
-    float rollAcc = atan2f(accelerations[1],accelerations[2])*180 / M_PI - 4.1;
-    float pitchAcc = -atan2f(-accelerations[0],sqrt(accelerations[1]*accelerations[1] + accelerations[2] * accelerations[2]))*180 / M_PI - 0.4;
+    float rollAcc = atan2f(accelerations[1],accelerations[2])*180 / M_PI;
+    float pitchAcc = atan2f(-accelerations[0],sqrt(accelerations[1]*accelerations[1] + accelerations[2] * accelerations[2]))*180 / M_PI;
 
     Pxx += (2 * Pxv + Pvv/_config.tickerFrequency)/_config.tickerFrequency;
     Pxv += Pvv/_config.tickerFrequency;
@@ -195,19 +103,20 @@ void IMU::estimator(float * roll, float * pitch){
     float kx = Pxx * (1.0/(Pxx + 70.0));
     float kv = Pxv * (1.0/(Pxx + 70.0));
 
-    *roll += (rollAcc - *roll)*kx;
-    *pitch += (pitchAcc - *pitch)*kx;
+    // *roll += (rollAcc - *roll)*kx;
+    // *pitch += (pitchAcc - *pitch)*kx;
 
-    // std::cout << (int32_t)(*pitch*1000) << std::endl;
+    // std::cout << (int32_t)(*pitch) << std::endl;
 
     Pxx *= (1-kx);
     Pxv *= (1-kx);
     Pvv -= kv * Pxv;
 
-    // *roll = *roll * 0.98 + rollAcc * 0.02;
+    *roll = *roll * 0.98 + rollAcc * 0.02;
     // kalman.calculate(roll);
-    // std::cout << (int32_t)((*roll)*1000) << std::endl;
+    std::cout << (int32_t)((*roll)) << std::endl;
     
-    // *pitch = *pitch * 0.98 + pitchAcc * 0.02;
+    *pitch = *pitch * 0.98 + pitchAcc * 0.02;
+    //  std::cout << (int32_t)(*pitch) << std::endl;
     // kalman.calculate(pitch);
 }

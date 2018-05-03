@@ -20,7 +20,7 @@ int ADXL345::initialize(uint16_t gRangeInput, ADXL345ConfigStruct config){
     }
 
     buffer[0] = REG_BW_RATE;
-    buffer[1] = CMD_DATA_RATE_1600HZ;
+    buffer[1] = CMD_DATA_RATE_3200HZ;
     status = i2c.write(ADXL345_ADDRESS,buffer,2);
     if (status != 0){
         return 2;
@@ -32,6 +32,13 @@ int ADXL345::initialize(uint16_t gRangeInput, ADXL345ConfigStruct config){
     status = i2c.write(ADXL345_ADDRESS,buffer,2);
     if (status != 0){
         return 3;
+    }
+
+    buffer[0] = REG_FIFO_CTL;
+    buffer[1] = CMD_FIFO_STREAM;
+    status = i2c.write(ADXL345_ADDRESS,buffer,2);
+    if (status !=0){
+        return 4;
     }
 
 //    status = selfTest();
@@ -152,8 +159,8 @@ int ADXL345::read(float * fx, float * fy, float * fz){
     z = ((float)((int16_t)(buffer[5]<<8)+buffer[4]))*gRange/(512.0);
 
     // filter data
-    *fx = -x * alphaX + Fx * (1.0-alphaX);
-    *fy = -y * alphaY + Fy * (1.0-alphaY);
+    *fx = x * alphaX + Fx * (1.0-alphaX);
+    *fy = y * alphaY + Fy * (1.0-alphaY);
     *fz = z * alphaZ + Fz * (1.0-alphaZ);
 
     // store filtered data for next calculation
