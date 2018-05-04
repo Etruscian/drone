@@ -44,8 +44,18 @@ Calibrates the devices on the IMU.
 
 */
 void IMU::calibrate(void){
-
-
+    float valueRoll = 0, valuePitch = 0, valueYaw = 0;
+    for (int i = 0; i<10000; i++){
+        itg3200.read(&temp,&velocities[0],&velocities[1],&velocities[2]);
+        valueRoll = valueRoll + (velocities[0]/10000.0);
+        valuePitch = valuePitch + (velocities[1]/10000.0);
+        valueYaw = valueYaw + (velocities[2]/10000.0);
+        wait_us(1000);
+        // std::cout << (int32_t)(valueRoll) << std::endl;
+    }
+    std::cout << (int32_t)(valueRoll*1000000) << std::endl;
+    std::cout << (int32_t)(valuePitch*1000000) << std::endl;
+    std::cout << (int32_t)(valueYaw*1000000) << std::endl;
 
 }
 
@@ -85,6 +95,7 @@ void IMU::update(void){
     }
 
     (*dataPtr).imu.rollVelocity = velocities[0];
+    // std::cout << (int32_t)(velocities[0]*1000) << std::endl;
     (*dataPtr).imu.pitchVelocity = velocities[1];
     (*dataPtr).imu.yawVelocity = velocities[2];
 }
@@ -114,7 +125,7 @@ void IMU::estimator(float * roll, float * pitch){
 
     *roll = *roll * 0.98 + rollAcc * 0.02;
     // kalman.calculate(roll);
-    std::cout << (int32_t)((*roll)) << std::endl;
+    // std::cout << (int32_t)((*roll)) << std::endl;
     
     *pitch = *pitch * 0.98 + pitchAcc * 0.02;
     //  std::cout << (int32_t)(*pitch) << std::endl;

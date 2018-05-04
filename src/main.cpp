@@ -137,7 +137,7 @@ void initialize(void)
         led2 = 1;
         return;
     }
-    
+
     ledTicker.attach(&ledUpdate, 0.5);
     while(!data.newPacket){
         data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;

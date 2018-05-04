@@ -37,9 +37,6 @@ class ITG3200{
         static const int  RESET_OFFSET = 0x07;
 
         static const float scaleFactor = 16.3835;
-        static const float rollOffset = -3.6;
-        static const float pitchOffset = 0.120;
-        static const float yawOffset = -0.760;
 
         char buffer[8];
         float x,y,z;
@@ -51,6 +48,9 @@ class ITG3200{
         int initialize(ITG3200ConfigStruct config);
             ITG3200(): i2c(p28,p27){}
         int read(float * temp, float * fx, float * fy, float * fz);
+        float rollOffset = -2.9438700;
+        float pitchOffset = 0.2350270;
+        float yawOffset = -0.713281;
 };
 
 #endif
