@@ -37,7 +37,7 @@ class ITG3200
 
     static const int RESET_OFFSET = 0x07;
 
-    static const float scaleFactor = 16.3835;
+    const float scaleFactor = 16.3835;
 
     char buffer[8];
     float x, y, z;
