@@ -12,7 +12,19 @@ void Controller::initialize(void)
     setpoint[1] = 0;
     setpoint[2] = 0;
     setpoint[3] = 0;
-    updateParameters();
+    
+    for (int i = 0; i <= 2; i++)
+    {
+        Kp[i] = config.controllerConfig.stabilizingModeConfig.Kp[i];
+        Ki[i] = config.controllerConfig.stabilizingModeConfig.Ki[i];
+        Kd[i] = config.controllerConfig.stabilizingModeConfig.Kd[i];
+    }
+    pidRoll.initialize(Kp[0], Ki[0], 0, 0.001, 50.0, -50.0);
+    pidRollVelocity.initialize(Kd[0], 0, 0, 0.001, 50.0, -50.0);
+    pidPitch.initialize(Kp[1], Ki[1], 0, 0.001, 50.0, -50.0);
+    pidPitchVelocity.initialize(Kd[1], 0, 0, 0.001, 50.0, -50.0);
+    pidYawVelocity.initialize(Kp[2], Ki[2], Kd[2], 0.001, 50.0, -50.0);
+
 }
 
 void Controller::update(void)
@@ -31,21 +43,18 @@ void Controller::update(void)
     pitch = pitch * (1 - 0.1) + pitchRemote * 0.1;
     yaw = yaw * (1 - 0.1) + yawRemote * 0.1;
 
-    positionController();
+    if (!data.acroMode){
+        positionController();
+    } else {
+        velocitySetpoint[0] = roll;
+        velocitySetpoint[1] = pitch;
+    }
 
     velocityController();
 }
 
 void Controller::positionController(void)
 {
-
-    if (data.acroMode)
-    {
-        velocitySetpoint[0] = roll;
-        velocitySetpoint[1] = pitch;
-        return;
-    }
-
     velocitySetpoint[0] = pidRoll.calculate(roll, data.imu.roll * config.controllerConfig.imuPrescaler[0]);
     velocitySetpoint[1] = pidPitch.calculate(pitch, data.imu.pitch * config.controllerConfig.imuPrescaler[1]);
 }
@@ -60,20 +69,4 @@ void Controller::velocityController(void)
 
         escController[i].update(throttle * 125.0 + setpoint);
     }
-}
-
-void Controller::updateParameters(void)
-{
-
-    for (int i = 0; i <= 2; i++)
-    {
-        Kp[i] = config.controllerConfig.stabilizingModeConfig.Kp[i];
-        Ki[i] = config.controllerConfig.stabilizingModeConfig.Ki[i];
-        Kd[i] = config.controllerConfig.stabilizingModeConfig.Kd[i];
-    }
-    pidRoll.initialize(Kp[0], Ki[0], 0, 0.001, 50.0, -50.0);
-    pidRollVelocity.initialize(Kd[0], 0, 0, 0.001, 50.0, -50.0);
-    pidPitch.initialize(Kp[1], Ki[1], 0, 0.001, 50.0, -50.0);
-    pidPitchVelocity.initialize(Kd[1], 0, 0, 0.001, 50.0, -50.0);
-    pidYawVelocity.initialize(Kp[2], Ki[2], Kd[2], 0.001, 50.0, -50.0);
 }

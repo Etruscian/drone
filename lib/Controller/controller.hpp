@@ -24,7 +24,6 @@ private:
   };
   controllerModes controllerMode;
   float Kp[3], Ki[3], Kd[3];
-  void updateParameters(void);
 
 public:
   Controller(PinName pin1, PinName pin2, PinName pin3, PinName pin4) : escController{ESCController(pin1), ESCController(pin2), ESCController(pin3), ESCController(pin4)} {}; // delegation of constructors
