@@ -126,17 +126,17 @@ void initialize(void)
     led2 = 0;
     led3 = 0;
     led4 = 0;
-    serial.initialize(&data, &config); 
+    serial.initialize(); 
     radioPower=1;
     wait(1);
-    status = radio.initialize(config, &data);
+    status = radio.initialize();
     if (status)
     {
         led = 1;
         return;
     }
     radioInterrupt.fall(callback(&radio, &Transceiver::interruptHandler));
-    status = imu.initialize(config, &data);
+    status = imu.initialize();
     if (status)
     {
         pc.printf("%u\n", status);
@@ -154,7 +154,7 @@ void initialize(void)
     ledTicker.detach();
     led4 = 0;
     
-    controller.initialize(&data, &config.controllerConfig);
+    controller.initialize();
 
     controllerInterrupt.attach(&flight, 1.0/config.tickerFrequency);
     gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),0.000125);

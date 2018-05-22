@@ -25,7 +25,7 @@ class Transceiver
 
   public:
     Transceiver(PinName mosi, PinName miso, PinName sck, PinName csn, PinName ce) : _radio(mosi, miso, sck, csn, ce){};
-    uint8_t initialize(configStruct config, dataStruct *data);
+    uint8_t initialize();
     bool messageAvailable();
     void send(uint8_t pipe, char *buffer, uint8_t length);
     void receive(int pipe, char *buffer, uint8_t length);

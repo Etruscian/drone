@@ -2,7 +2,7 @@
 #include <transceiver.h>
 #include <iostream>
 
-uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
+uint8_t Transceiver::initialize(void)
 {
     packetReceived = false;
 
@@ -24,7 +24,6 @@ uint8_t Transceiver::initialize(configStruct config, dataStruct *data)
     _radio.enable();
     transferSize = config.radioConfig.transferSize;
     rxBuffer = new char[transferSize];
-    dataPtr = data;
 
     prescaler[0] = config.controllerConfig.prescaler[0];
     prescaler[1] = config.controllerConfig.prescaler[1];
@@ -71,19 +70,19 @@ void Transceiver::interruptHandler(void){
     }
     if (status & 64)
     { // RX received
-        (*dataPtr).newPacket = true;
+        data.newPacket = true;
         _radio.read(0, rxBuffer, transferSize);
         _radio.setRegister(0x07, 64);
-        send(0,(char * )(*dataPtr).batteryLevel.u,4);
+        send(0,(char * )data.batteryLevel.u,4);
         for (int i = 0; i<=15;i++){
             rxData[i/4].c[i & 3] = rxBuffer[i];
         }
-        (*dataPtr).remote.throttle = rxData[0].f;
-        (*dataPtr).remote.roll = rxData[1].f * prescaler[0];
-        (*dataPtr).remote.pitch = rxData[2].f * prescaler[1];
-        (*dataPtr).remote.yaw = rxData[3].f * prescaler[2];
-        (*dataPtr).armMotor = (bool)((rxBuffer[16] >> 1) & 0x01);
-        (*dataPtr).acroMode = false;//(bool)(rxBuffer[16] & 0x01);
+        data.remote.throttle = rxData[0].f;
+        data.remote.roll = rxData[1].f * prescaler[0];
+        data.remote.pitch = rxData[2].f * prescaler[1];
+        data.remote.yaw = rxData[3].f * prescaler[2];
+        data.armMotor = (bool)((rxBuffer[16] >> 1) & 0x01);
+        data.acroMode = false;//(bool)(rxBuffer[16] & 0x01);
         _radio.flushRX();
     }
     

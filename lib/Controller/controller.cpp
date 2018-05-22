@@ -1,14 +1,12 @@
 #include "controller.hpp"
 #include <iostream>
 
-void Controller::initialize(dataStruct *data, controllerConfigStruct *controllerConfig)
+void Controller::initialize(void)
 {
     escController[0].initialize();
     escController[1].initialize();
     escController[2].initialize();
     escController[3].initialize();
-    dataPtr = data;
-    controllerConfigPtr = controllerConfig;
 
     setpoint[0] = 0;
     setpoint[1] = 0;
@@ -19,13 +17,13 @@ void Controller::initialize(dataStruct *data, controllerConfigStruct *controller
 
 void Controller::update(void)
 {
-    if ((*dataPtr).newPacket)
+    if (data.newPacket)
     {
-        throttleRemote = (*dataPtr).remote.throttle;
-        rollRemote = (*dataPtr).remote.roll;
-        pitchRemote = (*dataPtr).remote.pitch;
-        yawRemote = (*dataPtr).remote.yaw;
-        (*dataPtr).newPacket = false;
+        throttleRemote = data.remote.throttle;
+        rollRemote = data.remote.roll;
+        pitchRemote = data.remote.pitch;
+        yawRemote = data.remote.yaw;
+        data.newPacket = false;
     }
 
     throttle = throttle * (1 - 0.1) + throttleRemote * 0.1;
@@ -41,24 +39,24 @@ void Controller::update(void)
 void Controller::positionController(void)
 {
 
-    if ((*dataPtr).acroMode)
+    if (data.acroMode)
     {
         velocitySetpoint[0] = roll;
         velocitySetpoint[1] = pitch;
         return;
     }
 
-    velocitySetpoint[0] = pidRoll.calculate(roll, (*dataPtr).imu.roll * (*controllerConfigPtr).imuPrescaler[0]);
-    velocitySetpoint[1] = pidPitch.calculate(pitch, (*dataPtr).imu.pitch * (*controllerConfigPtr).imuPrescaler[1]);
+    velocitySetpoint[0] = pidRoll.calculate(roll, data.imu.roll * config.controllerConfig.imuPrescaler[0]);
+    velocitySetpoint[1] = pidPitch.calculate(pitch, data.imu.pitch * config.controllerConfig.imuPrescaler[1]);
 }
 
 void Controller::velocityController(void)
 {
     for (int i = 0; i <= 3; i++)
     {
-        float setpoint = (*controllerConfigPtr).signs[i][0] * pidRollVelocity.calculate(velocitySetpoint[0], (*dataPtr).imu.rollVelocity * (*controllerConfigPtr).imuPrescaler[0]) +
-                         (*controllerConfigPtr).signs[i][1] * pidPitchVelocity.calculate(velocitySetpoint[1], (*dataPtr).imu.pitchVelocity * (*controllerConfigPtr).imuPrescaler[1]) +
-                         (*controllerConfigPtr).signs[i][2] * pidYawVelocity.calculate(yaw, (*dataPtr).imu.yawVelocity * (*controllerConfigPtr).imuPrescaler[2]);
+        float setpoint = config.controllerConfig.signs[i][0] * pidRollVelocity.calculate(velocitySetpoint[0],  data.imu.rollVelocity * config.controllerConfig.imuPrescaler[0]) +
+                         config.controllerConfig.signs[i][1] * pidPitchVelocity.calculate(velocitySetpoint[1],  data.imu.pitchVelocity * config.controllerConfig.imuPrescaler[1]) +
+                         config.controllerConfig.signs[i][2] * pidYawVelocity.calculate(yaw,  data.imu.yawVelocity * config.controllerConfig.imuPrescaler[2]);
 
         escController[i].update(throttle * 125.0 + setpoint);
     }
@@ -69,9 +67,9 @@ void Controller::updateParameters(void)
 
     for (int i = 0; i <= 2; i++)
     {
-        Kp[i] = (*controllerConfigPtr).stabilizingModeConfig.Kp[i];
-        Ki[i] = (*controllerConfigPtr).stabilizingModeConfig.Ki[i];
-        Kd[i] = (*controllerConfigPtr).stabilizingModeConfig.Kd[i];
+        Kp[i] = config.controllerConfig.stabilizingModeConfig.Kp[i];
+        Ki[i] = config.controllerConfig.stabilizingModeConfig.Ki[i];
+        Kd[i] = config.controllerConfig.stabilizingModeConfig.Kd[i];
     }
     pidRoll.initialize(Kp[0], Ki[0], 0, 0.001, 50.0, -50.0);
     pidRollVelocity.initialize(Kd[0], 0, 0, 0.001, 50.0, -50.0);

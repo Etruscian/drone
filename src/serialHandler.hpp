@@ -5,10 +5,8 @@ class SerialHandler
 {
   public:
     SerialHandler() : _connection(USBTX, USBRX){};
-    void initialize(dataStruct * data, configStruct * config)
+    void initialize(void)
     {
-        _data = data;
-        _config = config;
         _connection.baud(128000);
         _connection.attach(callback(this, &SerialHandler::rxInterruptHandler), Serial::RxIrq);
         _connection.putc('a');
@@ -18,8 +16,6 @@ class SerialHandler
   private:
     Serial _connection;
     // LocalFileSystem local;
-    dataStruct * _data;
-    configStruct * _config;
     char rxBuffer[256], txBuffer[256];
     uint8_t rxBufferPosition, txBufferPosition, interpreterPosition;
 
@@ -54,10 +50,10 @@ class SerialHandler
                 return;
             }
             case '1':{
-                _connection.printf("%u\n", (*_config).radioConfig.channel);
-                _connection.printf("%lx\n", (*_config).radioConfig.txAddress);
-                _connection.printf("%u\n", (*_config).tickerFrequency);
-                _connection.printf("%u\n", (*_config).tickerFrequency);
+                _connection.printf("%u\n", config.radioConfig.channel);
+                _connection.printf("%lx\n", config.radioConfig.txAddress);
+                _connection.printf("%u\n", config.tickerFrequency);
+                _connection.printf("%u\n", config.tickerFrequency);
                 rxBufferPosition = 0;
                 interpreterPosition = 0;
                 return;

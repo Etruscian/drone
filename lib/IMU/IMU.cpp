@@ -12,7 +12,7 @@ Finally, the magnetometer is initialized.
 @return         status. 0 if success, error code otherwise
 
 */
-int IMU::initialize(configStruct config, dataStruct *data)
+int IMU::initialize(void)
 {
     int status;
     // Initialize the GYRO.
@@ -29,10 +29,6 @@ int IMU::initialize(configStruct config, dataStruct *data)
     // status = hmc5883l.initialize();
     // if (status)
     //     return status|0x20;
-
-    dataPtr = data;
-    _config = config;
-    kalman.init();
 
     return 0;
 }
@@ -62,9 +58,9 @@ void IMU::calibrate(void)
 
 void IMU::updateGyro(void){
     itg3200.read(&temp, &velocities[0], &velocities[1], &velocities[2]);
-    (*dataPtr).imu.rollVelocity = velocities[0];
-    (*dataPtr).imu.pitchVelocity = velocities[1];
-    (*dataPtr).imu.yawVelocity = velocities[2];
+    data.imu.rollVelocity = velocities[0];
+    data.imu.pitchVelocity = velocities[1];
+    data.imu.yawVelocity = velocities[2];
 }
 
 /*
@@ -78,13 +74,13 @@ It starts with updating the raw values.
 void IMU::updateAngles(void)
 {
     adxl345.read(&accelerations[0], &accelerations[1], &accelerations[2]);
-    estimator(&(*dataPtr).imu.roll, &(*dataPtr).imu.pitch);
+    estimator(&data.imu.roll, &data.imu.pitch);
 }
 
 void IMU::estimator(float *roll, float *pitch)
 {
-    *roll += (velocities[0]) / _config.tickerFrequency;
-    *pitch += (velocities[1]) / _config.tickerFrequency;
+    *roll += (velocities[0]) / config.tickerFrequency;
+    *pitch += (velocities[1]) / config.tickerFrequency;
     float rollAcc = atan2f(accelerations[1], accelerations[2]) * 180 / M_PI;
     float pitchAcc = atan2f(-accelerations[0], sqrt(accelerations[1] * accelerations[1] + accelerations[2] * accelerations[2])) * 180 / M_PI;
 

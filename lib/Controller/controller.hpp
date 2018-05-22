@@ -11,8 +11,6 @@ class Controller
 private:
   ESCController escController[4];
   PID pidRoll, pidPitch, pidRollVelocity, pidPitchVelocity, pidYawVelocity;
-  dataStruct *dataPtr;
-  controllerConfigStruct *controllerConfigPtr;
   float setpoint[4], velocitySetpoint[2];
   float throttle, roll, pitch, yaw;
   float throttleRemote, rollRemote, pitchRemote, yawRemote;
@@ -30,7 +28,7 @@ private:
 
 public:
   Controller(PinName pin1, PinName pin2, PinName pin3, PinName pin4) : escController{ESCController(pin1), ESCController(pin2), ESCController(pin3), ESCController(pin4)} {}; // delegation of constructors
-  void initialize(dataStruct *data, controllerConfigStruct *controllerConfig);
+  void initialize(void);
   void update(void);
   void positionController(void);
   void velocityController(void);

@@ -119,4 +119,7 @@ struct configStruct
     uint16_t tickerFrequency;
 };
 
+extern dataStruct data;
+extern configStruct config;
+
 #endif
