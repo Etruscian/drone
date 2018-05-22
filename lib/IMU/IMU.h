@@ -22,14 +22,13 @@ private:
   float temp;
   // float qw, qx, qy, qz;
   float estimated_roll, estimated_pitch, k;
-
-  void getReadings(void);
   // void calculateQuaternions(void);
 
 public:
   int initialize(configStruct config, dataStruct *data);
   void calibrate(void);
-  void update(void);
+  void updateGyro(void);
+  void updateAngles(void);
   void estimator(float *roll, float *pitch);
 };
 

@@ -54,31 +54,17 @@ void IMU::calibrate(void)
         valuePitch = valuePitch + (velocities[1] / 10000.0);
         valueYaw = valueYaw + (velocities[2] / 10000.0);
         wait_us(1000);
-        // std::cout << (int32_t)(valueRoll) << std::endl;
     }
     std::cout << (int32_t)(valueRoll * 1000000) << std::endl;
     std::cout << (int32_t)(valuePitch * 1000000) << std::endl;
     std::cout << (int32_t)(valueYaw * 1000000) << std::endl;
 }
 
-/*
-Starts the transfers for the different devices on the IMU. It stores these values
-in the class variables.
-
-@param          none
-@return         none
-
-*/
-void IMU::getReadings(void)
-{
-    // Read from accelerometer.
-    adxl345.read(&accelerations[0], &accelerations[1], &accelerations[2]);
-
-    // Read from GRYO.
+void IMU::updateGyro(void){
     itg3200.read(&temp, &velocities[0], &velocities[1], &velocities[2]);
-
-    // Read from magnetometer.
-    //hmc5883l.read(&heading[0],&heading[1],&heading[2]);
+    (*dataPtr).imu.rollVelocity = velocities[0];
+    (*dataPtr).imu.pitchVelocity = velocities[1];
+    (*dataPtr).imu.yawVelocity = velocities[2];
 }
 
 /*
@@ -89,19 +75,10 @@ It starts with updating the raw values.
 @return         none
 
 */
-void IMU::update(void)
+void IMU::updateAngles(void)
 {
-    // Get raw values from devices.
-    getReadings();
-
-    if (!(*dataPtr).acroMode)
-    {
-        estimator(&(*dataPtr).imu.roll, &(*dataPtr).imu.pitch);
-    }
-
-    (*dataPtr).imu.rollVelocity = velocities[0];
-    (*dataPtr).imu.pitchVelocity = velocities[1];
-    (*dataPtr).imu.yawVelocity = velocities[2];
+    adxl345.read(&accelerations[0], &accelerations[1], &accelerations[2]);
+    estimator(&(*dataPtr).imu.roll, &(*dataPtr).imu.pitch);
 }
 
 void IMU::estimator(float *roll, float *pitch)

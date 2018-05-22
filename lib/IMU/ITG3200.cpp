@@ -6,7 +6,7 @@ int ITG3200::initialize(ITG3200ConfigStruct config)
 
     // set sample rate and filter frequency
     buffer[0] = REG_CONFIG;
-    buffer[1] = (FS_SELECT << FS_OFFSET) | SAMPLE_RATE_1KHZ_188;
+    buffer[1] = (FS_SELECT << FS_OFFSET) | SAMPLE_RATE_8KHZ_256;
 
     i2c.write(ITG3200_ADDRESS, buffer, 2);
 
