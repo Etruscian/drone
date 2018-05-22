@@ -43,11 +43,11 @@ void Controller::update(void)
     pitch = pitch * (1 - 0.1) + pitchRemote * 0.1;
     yaw = yaw * (1 - 0.1) + yawRemote * 0.1;
 
-    if (!data.acroMode){
-        positionController();
-    } else {
+    if (data.acroMode){
         velocitySetpoint[0] = roll;
         velocitySetpoint[1] = pitch;
+    } else {
+        positionController();
     }
 
     velocityController();

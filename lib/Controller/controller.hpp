@@ -17,12 +17,6 @@ private:
   float rollError, pitchError, yawError;
   float rollVelocityError, pitchVelocityError, yawVelocityError;
   float rollControlValue, pitchControlValue, yawControlValue;
-  enum controllerModes
-  {
-    ACRO,
-    STABILIZE
-  };
-  controllerModes controllerMode;
   float Kp[3], Ki[3], Kd[3];
 
 public:
