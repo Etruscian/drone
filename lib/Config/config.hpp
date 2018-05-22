@@ -31,7 +31,7 @@ struct imuStruct
     float yawVelocity;
 };
 
-typedef union _batteryLevelUnion{
+typedef union _batteryLevelUnion {
     float f;
     uint8_t u[4];
 } _batteryLevel;
@@ -82,25 +82,25 @@ struct controllerConfigStruct
 };
 
 struct ITG3200ConfigStruct
-    {
-        float a;
-        float b;
-        float c;
-    };
+{
+    float a;
+    float b;
+    float c;
+};
 
 struct HMC5883LConfigStruct
-    {
-        float a;
-        float b;
-        float c;
-    };
+{
+    float a;
+    float b;
+    float c;
+};
 
 struct ADXL345ConfigStruct
-    {
-        float a;
-        float b;
-        float c;
-    };
+{
+    float a;
+    float b;
+    float c;
+};
 
 struct imuConfigStruct
 {

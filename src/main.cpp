@@ -147,7 +147,7 @@ void initialize(void)
     
     controller.initialize(&data, &config.controllerConfig);
     controllerInterrupt.attach(&flight, 1.0/config.tickerFrequency);
-    // imuInterrupt.attach(&imuUpdate,0.001);
+    imuInterrupt.attach(callback(&imu, &IMU::update),0.001);
     // watchdog.kick(0.1);
 }
 
