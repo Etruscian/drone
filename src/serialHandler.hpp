@@ -1,5 +1,6 @@
 #include <mbed.h>
 #include "config.hpp"
+#include <iniparser.h>
 
 class SerialHandler
 {
@@ -52,8 +53,8 @@ class SerialHandler
             case '1':{
                 _connection.printf("%u\n", config.radioConfig.channel);
                 _connection.printf("%lx\n", config.radioConfig.txAddress);
-                _connection.printf("%u\n", config.tickerFrequency);
-                _connection.printf("%u\n", config.tickerFrequency);
+                _connection.printf("%u\n", config.flightTickerFrequency);
+                _connection.printf("%u\n", config.gyroTickerFrequency);
                 rxBufferPosition = 0;
                 interpreterPosition = 0;
                 return;

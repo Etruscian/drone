@@ -25,6 +25,7 @@ public:
   void update(void);
   void positionController(void);
   void velocityController(void);
+  void updateMotorControllers(void);
 };
 
 #endif

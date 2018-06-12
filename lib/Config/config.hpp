@@ -116,7 +116,9 @@ struct configStruct
     radioConfigStruct radioConfig;
     controllerConfigStruct controllerConfig;
     imuConfigStruct imuconfig;
-    uint16_t tickerFrequency;
+    uint16_t flightTickerFrequency;
+    uint16_t gyroTickerFrequency;
+    uint16_t angleTickerFrequency;
 };
 
 extern dataStruct data;

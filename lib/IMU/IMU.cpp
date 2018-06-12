@@ -63,14 +63,6 @@ void IMU::updateGyro(void){
     data.imu.yawVelocity = velocities[2];
 }
 
-/*
-Updates the dataPtr. 
-It starts with updating the raw values.
-
-@param          none
-@return         none
-
-*/
 void IMU::updateAngles(void)
 {
     adxl345.read(&accelerations[0], &accelerations[1], &accelerations[2]);
@@ -79,10 +71,10 @@ void IMU::updateAngles(void)
 
 void IMU::estimator(float *roll, float *pitch)
 {
-    *roll += (velocities[0]) / config.tickerFrequency;
-    *pitch += (velocities[1]) / config.tickerFrequency;
-    float rollAcc = atan2f(accelerations[1], accelerations[2]) * 180 / M_PI;
-    float pitchAcc = atan2f(-accelerations[0], sqrt(accelerations[1] * accelerations[1] + accelerations[2] * accelerations[2])) * 180 / M_PI;
+    *roll += (velocities[0]) / config.angleTickerFrequency;
+    *pitch += (velocities[1]) / config.angleTickerFrequency;
+    float rollAcc = atan2f(accelerations[1], accelerations[2]) * 180 / 3.14159265358979323846;
+    float pitchAcc = atan2f(-accelerations[0], sqrt(accelerations[1] * accelerations[1] + accelerations[2] * accelerations[2])) * 180 / 3.14159265358979323846;
 
     *roll = *roll * 0.98 + rollAcc * 0.02;
 
