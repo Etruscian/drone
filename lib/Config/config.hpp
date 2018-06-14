@@ -41,13 +41,11 @@ struct dataStruct
     remoteStruct remote;
     imuStruct imu;
     _batteryLevel batteryLevel;
-    bool acroMode;
-    bool armMotorRequested;
-    bool armMotor;
-    bool newPacket;
+    volatile bool acroMode;
+    volatile bool armMotor;
+    volatile bool newPacket;
 
     dataStruct() : acroMode(false),
-                   armMotorRequested(false),
                    armMotor(false),
                    newPacket(false)
     {

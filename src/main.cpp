@@ -18,7 +18,7 @@ configStruct config;
 Transceiver radio(p5, p6, p7, p8, p9);
 InterruptIn radioInterrupt(p10);
 Ticker controllerInterrupt, gyroInterrupt, ledTicker, angleInterrupt, batteryTicker;
-Controller controller(p24, p22, p21, p23);
+Controller controller(p24, p22, p25, p23);
 IMU imu;
 
 uint8_t status;
@@ -86,18 +86,19 @@ void initialize(void)
     ledTicker.attach(&ledUpdate, 0.5);
     batteryTicker.attach(&batteryLevelUpdate, 0.1);
 
-    // while(!data.newPacket){
-    //     data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
-    // }
+    data.newPacket = false;
+    while(!data.newPacket){
+        data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
+    }
 
-    // ledTicker.detach();
-    // led4 = 0;
+    ledTicker.detach();
+    led4 = 0;
     
-    // controller.initialize();
+    controller.initialize();
 
-    //controllerInterrupt.attach(&flight, 1.0/config.flightTickerFrequency);
-    // gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),1.0/config.gyroTickerFrequency);
-    // angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
+    controllerInterrupt.attach(&flight, 1.0/config.flightTickerFrequency);
+    gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),1.0/config.gyroTickerFrequency);
+    angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
     // watchdog.kick(0.1);
 }
 
