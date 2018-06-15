@@ -36,12 +36,9 @@ int ITG3200::read(float *temp, float *roll, float *pitch, float *yaw)
 
     // calculate data from raw readings
     // *temp = (float)(35 + ((int16_t)((buffer[0]<<8) + buffer[1])+13200.0)/280.0);
-    x = (1 - a) * x + a * ((float)((int16_t)((buffer[0] << 8) + buffer[1])) / scaleFactor - rollOffset);
-    y = (1 - b) * y + b * ((float)((int16_t)((buffer[2] << 8) + buffer[3])) / scaleFactor - pitchOffset);
-    z = (1 - c) * z + c * ((float)((int16_t)((buffer[4] << 8) + buffer[5])) / scaleFactor - yawOffset);
-    *roll = x;
-    *pitch = y;
-    *yaw = z;
+    *roll = (1 - a) * *roll + a * ((float)((int16_t)((buffer[0] << 8) + buffer[1])) / scaleFactor - rollOffset);
+    *pitch = (1 - b) * *pitch + b * ((float)((int16_t)((buffer[2] << 8) + buffer[3])) / scaleFactor - pitchOffset);
+    *yaw = (1 - c) * *yaw + c * ((float)((int16_t)((buffer[4] << 8) + buffer[5])) / scaleFactor - yawOffset);
 
     return 0;
 }

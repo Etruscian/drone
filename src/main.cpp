@@ -5,7 +5,7 @@
 #include "transceiver.h"
 #include "IMU.h"
 #include "controller.hpp"
-#include <helpers.hpp>
+#include "helpers.hpp"
 
 Watchdog watchdog;
 
@@ -18,7 +18,7 @@ configStruct config;
 Transceiver radio(p5, p6, p7, p8, p9);
 InterruptIn radioInterrupt(p10);
 Ticker controllerInterrupt, gyroInterrupt, ledTicker, angleInterrupt, batteryTicker;
-Controller controller(p24, p22, p25, p23);
+Controller controller(p23, p24, p25, p22);
 IMU imu;
 
 uint8_t status;
@@ -37,7 +37,7 @@ void batteryLevelUpdate(void){
 
 void flight(void)
 {   
-    // watchdog.kick();
+    watchdog.kick();
     controller.update();
 }
 
@@ -78,7 +78,6 @@ void initialize(void)
     status = imu.initialize();
     if (status)
     {
-        //pc.printf("%u\n", status);
         led2 = 1;
         return;
     }
@@ -99,7 +98,7 @@ void initialize(void)
     controllerInterrupt.attach(&flight, 1.0/config.flightTickerFrequency);
     gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),1.0/config.gyroTickerFrequency);
     angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
-    // watchdog.kick(0.1);
+    watchdog.kick(0.1);
 }
 
 int main()

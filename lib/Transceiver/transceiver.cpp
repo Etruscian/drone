@@ -16,7 +16,6 @@ uint8_t Transceiver::initialize(void)
     _radio.setTransferSize(config.radioConfig.transferSize);
     _radio.setCrcWidth(16);
     _radio.enableAutoAcknowledge(NRF24L01P_PIPE_P0);
-    //std::cout << std::hex << config.radioConfig.rxAddress << std::endl;
     _radio.setRxAddress(config.radioConfig.rxAddress);
     _radio.setTxAddress(config.radioConfig.txAddress);
     _radio.setAirDataRate(NRF24L01P_DATARATE_250_KBPS);
@@ -34,7 +33,7 @@ uint8_t Transceiver::initialize(void)
 
 void Transceiver::interruptHandler(void){
     status = _radio.getStatusRegister();
-    //std::cout << "Packet" << std::endl;
+
     if (status == 0)
     { //data not ready?
         while (status == 0)
