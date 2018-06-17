@@ -18,41 +18,35 @@ void loadConfig(void){
     config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",17);
 
     // Read remote prescalers
-    config.controllerConfig.prescaler[0] = (float)iniparser_getdouble(dir, "controller:prescaler_roll",0);
-    config.controllerConfig.prescaler[1] = (float)iniparser_getdouble(dir, "controller:prescaler_pitch",0);
-    config.controllerConfig.prescaler[2] = (float)iniparser_getdouble(dir, "controller:prescaler_yaw",0);
-    config.controllerConfig.imuPrescaler[0] = (float)iniparser_getdouble(dir, "controller:prescaler_roll_imu",0);
-    config.controllerConfig.imuPrescaler[1] = (float)iniparser_getdouble(dir, "controller:prescaler_pitch_imu",0);
-    config.controllerConfig.imuPrescaler[2] = (float)iniparser_getdouble(dir, "controller:prescaler_yaw_imu",0);
+    config.controllerConfig.anglePrescalerRoll = (float)iniparser_getdouble(dir, "anglecontroller:prescaler_roll",0);
+    config.controllerConfig.anglePrescalerPitch = (float)iniparser_getdouble(dir, "anglecontroller:prescaler_pitch",0);
+    config.controllerConfig.angleImuPrescalerRoll = (float)iniparser_getdouble(dir, "controller:prescaler_rollangle_imu",0);
+    config.controllerConfig.angleImuPrescalerPitch = (float)iniparser_getdouble(dir, "controller:prescaler_pitchangle_imu",0);
+
+    config.controllerConfig.ratePrescalerRoll = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_roll",0);
+    config.controllerConfig.ratePrescalerPitch = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_pitch",0);
+    config.controllerConfig.ratePrescalerYaw = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_yaw",0);
+    config.controllerConfig.rateImuPrescalerRoll = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_rollangle_imu",0);
+    config.controllerConfig.rateImuPrescalerPitch = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_pitchangle_imu",0);
+    config.controllerConfig.rateImuPrescalerYaw = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_yawangle_imu",0);
 
 
-    // Read config for ACRO mode
-    char * keysAcro[9];
-    const char ** keysAcroPtr = (const char **) &keysAcro;
-    keysAcroPtr = iniparser_getseckeys(dir, "acromode", keysAcroPtr);
-    for (int i = 0; i<=2; i++){
-        config.controllerConfig.acroModeConfig.Kp[i] = (float)iniparser_getdouble(dir, (keysAcro[i]),0);
-    }
-    for (int i = 0; i<=2; i++){
-        config.controllerConfig.acroModeConfig.Ki[i] = (float)iniparser_getdouble(dir, (keysAcro[i+3]),0);
-    }
-    for (int i = 0; i<=2; i++){
-        config.controllerConfig.acroModeConfig.Kd[i] = (float)iniparser_getdouble(dir, (keysAcro[i+6]),0);
-    }
-
-    // Read config for stabilizing mode
-    char * keysStabilizing[9];
-    const char ** keysStabilizingPtr = (const char **) &keysStabilizing;
-    keysStabilizingPtr = iniparser_getseckeys(dir, "stabilizingmode", keysStabilizingPtr);
-    for (int i = 0; i<=2; i++){
-        config.controllerConfig.stabilizingModeConfig.Kp[i] = (float)iniparser_getdouble(dir, (keysStabilizing[i]),0);
-    }
-    for (int i = 0; i<=2; i++){
-        config.controllerConfig.stabilizingModeConfig.Ki[i] = (float)iniparser_getdouble(dir, (keysStabilizing[i+3]),0);
-    }
-    for (int i = 0; i<=2; i++){
-        config.controllerConfig.stabilizingModeConfig.Kd[i] = (float)iniparser_getdouble(dir, (keysStabilizing[i+6]),0);
-    }
+    // Read config for controllers
+    config.controllerConfig.rateController.KpRoll = (float)iniparser_getdouble(dir, "acromode:kp_roll",0);
+    config.controllerConfig.rateController.KiRoll = (float)iniparser_getdouble(dir, "acromode:ki_roll",0);
+    config.controllerConfig.rateController.KdRoll = (float)iniparser_getdouble(dir, "acromode:kd_roll",0);
+    config.controllerConfig.rateController.KpPitch = (float)iniparser_getdouble(dir, "acromode:kp_pitch",0);
+    config.controllerConfig.rateController.KiPitch = (float)iniparser_getdouble(dir, "acromode:ki_pitch",0);
+    config.controllerConfig.rateController.KdPitch = (float)iniparser_getdouble(dir, "acromode:kd_pitch",0);
+    config.controllerConfig.rateController.KpYaw = (float)iniparser_getdouble(dir, "acromode:kp_yaw",0);
+    config.controllerConfig.rateController.KiYaw = (float)iniparser_getdouble(dir, "acromode:ki_yaw",0);
+    config.controllerConfig.rateController.KdYaw = (float)iniparser_getdouble(dir, "acromode:kd_yaw",0);
+    config.controllerConfig.angleController.KpRoll = (float)iniparser_getdouble(dir, "stabilizemode:kp_roll",0);
+    config.controllerConfig.angleController.KiRoll = (float)iniparser_getdouble(dir, "stabilizemode:ki_roll",0);
+    config.controllerConfig.angleController.KdRoll = (float)iniparser_getdouble(dir, "stabilizemode:kd_roll",0);
+    config.controllerConfig.angleController.KpPitch = (float)iniparser_getdouble(dir, "stabilizemode:kp_pitch",0);
+    config.controllerConfig.angleController.KiPitch = (float)iniparser_getdouble(dir, "stabilizemode:ki_pitch",0);
+    config.controllerConfig.angleController.KdPitch = (float)iniparser_getdouble(dir, "stabilizemode:kd_pitch",0);
 
     // Read config for motor direction compensation
     char * keysSigns[12];

@@ -25,9 +25,6 @@ uint8_t Transceiver::initialize(void)
     transferSize = config.radioConfig.transferSize;
     rxBuffer = new char[transferSize];
 
-    prescaler[0] = config.controllerConfig.prescaler[0];
-    prescaler[1] = config.controllerConfig.prescaler[1];
-    prescaler[2] = config.controllerConfig.prescaler[2];
     return 0;
 }
 
@@ -78,9 +75,9 @@ void Transceiver::interruptHandler(void){
             rxData[i/4].c[i & 3] = rxBuffer[i];
         }
         data.remote.throttle = rxData[0].f;
-        data.remote.roll = rxData[1].f * prescaler[0];
-        data.remote.pitch = rxData[2].f * prescaler[1];
-        data.remote.yaw = rxData[3].f * prescaler[2];
+        data.remote.roll = rxData[1].f;
+        data.remote.pitch = rxData[2].f;
+        data.remote.yaw = rxData[3].f;
         data.armMotor = (bool)((rxBuffer[16] >> 1) & 0x01);
         data.acroMode = (bool)(rxBuffer[16] & 0x01);
         _radio.flushRX();

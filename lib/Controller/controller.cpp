@@ -13,17 +13,11 @@ void Controller::initialize(void)
     setpoint[2] = 0;
     setpoint[3] = 0;
 
-    for (int i = 0; i <= 2; i++)
-    {
-        Kp[i] = config.controllerConfig.stabilizingModeConfig.Kp[i];
-        Ki[i] = config.controllerConfig.stabilizingModeConfig.Ki[i];
-        Kd[i] = config.controllerConfig.stabilizingModeConfig.Kd[i];
-    }
-    pidRoll.initialize(Kp[0], Ki[0], 0, 0.001, 50.0, -50.0);
-    pidRollVelocity.initialize(Kd[0], 0, 0, 0.001, 50.0, -50.0);
-    pidPitch.initialize(Kp[1], Ki[1], 0, 0.001, 50.0, -50.0);
-    pidPitchVelocity.initialize(Kd[1], 0, 0, 0.001, 50.0, -50.0);
-    pidYawVelocity.initialize(Kp[2], Ki[2], Kd[2], 0.001, 50.0, -50.0);
+    pidRoll.initialize(config.controllerConfig.angleController.KpRoll, config.controllerConfig.angleController.KiRoll, config.controllerConfig.angleController.KdRoll, 1.0/config.flightTickerFrequency, 50.0, -50.0);
+    pidRollVelocity.initialize(config.controllerConfig.rateController.KpRoll, config.controllerConfig.rateController.KiRoll, config.controllerConfig.rateController.KdRoll, 1.0/config.flightTickerFrequency, 50.0, -50.0);
+    pidPitch.initialize(config.controllerConfig.angleController.KpPitch, config.controllerConfig.angleController.KiPitch, config.controllerConfig.angleController.KdPitch, 1.0/config.flightTickerFrequency, 50.0, -50.0);
+    pidPitchVelocity.initialize(config.controllerConfig.rateController.KpPitch, config.controllerConfig.rateController.KiPitch, config.controllerConfig.rateController.KdPitch, 1.0/config.flightTickerFrequency, 50.0, -50.0);
+    pidYawVelocity.initialize(config.controllerConfig.rateController.KpYaw, config.controllerConfig.rateController.KiYaw, config.controllerConfig.rateController.KdYaw, 0.001, 50.0, -50.0);
 }
 
 void Controller::update(void)
@@ -43,11 +37,10 @@ void Controller::update(void)
         roll = roll * (1 - 0.1) + rollRemote * 0.1;
         pitch = pitch * (1 - 0.1) + pitchRemote * 0.1;
         yaw = yaw * (1 - 0.1) + yawRemote * 0.1;
-
         if (data.acroMode)
         {
-            velocitySetpoint[0] = roll;
-            velocitySetpoint[1] = pitch;
+            velocitySetpoint[0] = roll*config.controllerConfig.ratePrescalerRoll;
+            velocitySetpoint[1] = pitch*config.controllerConfig.ratePrescalerPitch;
         }
         else
         {
@@ -66,17 +59,17 @@ void Controller::update(void)
 
 void Controller::positionController(void)
 {
-    velocitySetpoint[0] = pidRoll.calculate(roll, data.imu.roll * config.controllerConfig.imuPrescaler[0]);
-    velocitySetpoint[1] = pidPitch.calculate(pitch, data.imu.pitch * config.controllerConfig.imuPrescaler[1]);
+    velocitySetpoint[0] = pidRoll.calculate(roll, data.imu.roll * config.controllerConfig.angleImuPrescalerRoll);
+    velocitySetpoint[1] = pidPitch.calculate(pitch, data.imu.pitch * config.controllerConfig.angleImuPrescalerPitch);
 }
 
 void Controller::velocityController(void)
 {
     for (int i = 0; i <= 3; i++)
     {
-        setpoint[i] = config.controllerConfig.signs[i][0] * pidRollVelocity.calculate(velocitySetpoint[0], data.imu.rollVelocity * config.controllerConfig.imuPrescaler[0]) +
-                      config.controllerConfig.signs[i][1] * pidPitchVelocity.calculate(velocitySetpoint[1], data.imu.pitchVelocity * config.controllerConfig.imuPrescaler[1]) +
-                      config.controllerConfig.signs[i][2] * pidYawVelocity.calculate(yaw, data.imu.yawVelocity * config.controllerConfig.imuPrescaler[2]);
+        setpoint[i] = config.controllerConfig.signs[i][0] * pidRollVelocity.calculate(velocitySetpoint[0], data.imu.rollVelocity * config.controllerConfig.rateImuPrescalerRoll) +
+                      config.controllerConfig.signs[i][1] * pidPitchVelocity.calculate(velocitySetpoint[1], data.imu.pitchVelocity * config.controllerConfig.rateImuPrescalerPitch) +
+                      config.controllerConfig.signs[i][2] * pidYawVelocity.calculate(yaw, data.imu.yawVelocity * config.controllerConfig.rateImuPrescalerYaw);
     }
 }
 

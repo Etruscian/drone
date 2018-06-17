@@ -60,23 +60,34 @@ struct radioConfigStruct
     uint8_t transferSize;
 };
 
-struct acroModeStruct
+struct rateControllerStruct
 {
-    float Kp[3], Ki[3], Kd[3];
+    float KpRoll, KiRoll, KdRoll;
+    float KpPitch, KiPitch, KdPitch;
+    float KpYaw, KiYaw, KdYaw;
 };
 
-struct stabilizingModeStruct
+struct angleControllerStruct
 {
-    float Kp[3], Ki[3], Kd[3];
+    float KpRoll, KiRoll, KdRoll;
+    float KpPitch, KiPitch, KdPitch;
 };
 
 struct controllerConfigStruct
 {
-    acroModeStruct acroModeConfig;
-    stabilizingModeStruct stabilizingModeConfig;
+    rateControllerStruct rateController;
+    angleControllerStruct angleController;
     int8_t signs[4][3];
-    float prescaler[3];
-    float imuPrescaler[3];
+    float anglePrescalerRoll;
+    float anglePrescalerPitch;
+    float ratePrescalerRoll;
+    float ratePrescalerPitch;
+    float ratePrescalerYaw;
+    float angleImuPrescalerRoll;
+    float angleImuPrescalerPitch;
+    float rateImuPrescalerRoll;
+    float rateImuPrescalerPitch;
+    float rateImuPrescalerYaw;
 };
 
 struct ITG3200ConfigStruct
