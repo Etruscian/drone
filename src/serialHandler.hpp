@@ -10,19 +10,21 @@ class SerialHandler
     {
         _connection.baud(128000);
         _connection.attach(callback(this, &SerialHandler::rxInterruptHandler), Serial::RxIrq);
-        _connection.putc('a');
+        //_connection.putc('a');
         // _connection.attach(callback(this, &SerialHandler::txInterruptHandler), Serial::TxIrq);
     };
 
   private:
     Serial _connection;
-    // LocalFileSystem local;
     char rxBuffer[256], txBuffer[256];
     uint8_t rxBufferPosition, txBufferPosition, interpreterPosition;
 
     void rxInterruptHandler(void)
     {   
+        DigitalOut led(LED1);
+        led = 1;
         rxBuffer[rxBufferPosition] = _connection.getc();
+        _connection.putc(rxBuffer[rxBufferPosition]);
         if (rxBuffer[rxBufferPosition] == '\n')
         {
             interpretData();
@@ -82,7 +84,9 @@ class SerialHandler
                 return;
                 }
             default:
-                break;
+                interpreterPosition = 0;
+                rxBufferPosition = 0;
+                return;
             }
             interpreterPosition++;
         }

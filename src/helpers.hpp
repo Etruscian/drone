@@ -4,15 +4,20 @@
 #include <mbed.h>
 #include "iniparser.h"
 #include <config.hpp>
+#include <iostream>
 
 extern configStruct config;
+extern LocalFileSystem local;
 
 void loadConfig(void){
-    LocalFileSystem local("local");
+    std::cout << "hi" << std::endl;
+    std::cout << "hi" << std::endl;
     dictionary *dir = iniparser_load("/local/config.ini");
+    std::cout << local.getName() << std::endl;
 
     // Read config for radio
     config.radioConfig.channel = iniparser_getint(dir, "radio:channel",101);
+    std::cout << "hi" << std::endl;
     config.radioConfig.txAddress = iniparser_getlongint(dir, "radio:txaddress",0x007DEADBEE);
     config.radioConfig.rxAddress = iniparser_getlongint(dir, "radio:rxaddress",0x007DEADBEE);
     config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",17);
@@ -26,9 +31,9 @@ void loadConfig(void){
     config.controllerConfig.ratePrescalerRoll = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_roll",0);
     config.controllerConfig.ratePrescalerPitch = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_pitch",0);
     config.controllerConfig.ratePrescalerYaw = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_yaw",0);
-    config.controllerConfig.rateImuPrescalerRoll = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_rollangle_imu",0);
-    config.controllerConfig.rateImuPrescalerPitch = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_pitchangle_imu",0);
-    config.controllerConfig.rateImuPrescalerYaw = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_yawangle_imu",0);
+    config.controllerConfig.rateImuPrescalerRoll = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_rollrate_imu",0);
+    config.controllerConfig.rateImuPrescalerPitch = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_pitchrate_imu",0);
+    config.controllerConfig.rateImuPrescalerYaw = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_yawrate_imu",0);
 
 
     // Read config for controllers
@@ -75,6 +80,7 @@ void loadConfig(void){
     config.gyroTickerFrequency = (uint16_t) iniparser_getint(dir, "misc:gyrofrequency",1000);
     config.angleTickerFrequency = (uint16_t) iniparser_getint(dir, "misc:anglefrequency",250);
     iniparser_freedict(dir);
+    std::cout << "hi" << std::endl;
 }
 
 #endif

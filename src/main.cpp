@@ -10,7 +10,7 @@
 Watchdog watchdog;
 
 Serial pc(USBTX,USBRX);
-//SerialHandler serial;
+SerialHandler serial;
 DigitalOut led(LED1), led2(LED2), led3(LED3), led4(LED4), radioPower(p30);
 AnalogIn battery(p20);
 dataStruct data;
@@ -20,6 +20,7 @@ InterruptIn radioInterrupt(p10);
 Ticker controllerInterrupt, gyroInterrupt, ledTicker, angleInterrupt, batteryTicker;
 Controller controller(p23, p24, p25, p22);
 IMU imu;
+LocalFileSystem local("local");
 
 uint8_t status;
 
@@ -53,7 +54,7 @@ void initialize(void)
     led3 = 0;
     led4 = 0;
 
-    //serial.initialize(); 
+    serial.initialize(); 
 
     radioPower=1;
     wait(1);
@@ -82,6 +83,8 @@ void initialize(void)
         return;
     }
 
+    //imu.calibrate();
+
     ledTicker.attach(&ledUpdate, 0.5);
     batteryTicker.attach(&batteryLevelUpdate, 0.1);
 
@@ -97,7 +100,7 @@ void initialize(void)
 
     controllerInterrupt.attach(&flight, 1.0/config.flightTickerFrequency);
     gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),1.0/config.gyroTickerFrequency);
-    angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
+    //angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
     watchdog.kick(0.1);
 }
 
