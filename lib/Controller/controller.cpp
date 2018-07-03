@@ -69,7 +69,7 @@ void Controller::velocityController(void)
     {
         setpoint[i] = config.controllerConfig.signs[i][0] * pidRollVelocity.calculate(velocitySetpoint[0], data.imu.rollVelocity * config.controllerConfig.rateImuPrescalerRoll) +
                       config.controllerConfig.signs[i][1] * pidPitchVelocity.calculate(velocitySetpoint[1], data.imu.pitchVelocity * config.controllerConfig.rateImuPrescalerPitch) +
-                      config.controllerConfig.signs[i][2] * pidYawVelocity.calculate(yaw, data.imu.yawVelocity * config.controllerConfig.rateImuPrescalerYaw);
+                      config.controllerConfig.signs[i][2] * pidYawVelocity.calculate(velocitySetpoint[2], data.imu.yawVelocity * config.controllerConfig.rateImuPrescalerYaw);
     }
 }
 
