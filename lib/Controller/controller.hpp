@@ -11,7 +11,7 @@ class Controller
 private:
   ESCController escController[4];
   PID pidRoll, pidPitch, pidRollVelocity, pidPitchVelocity, pidYawVelocity;
-  float setpoint[4], velocitySetpoint[2];
+  float setpoint[4], velocitySetpoint[3];
   float throttle, roll, pitch, yaw;
   float throttleRemote, rollRemote, pitchRemote, yawRemote;
   float rollError, pitchError, yawError;

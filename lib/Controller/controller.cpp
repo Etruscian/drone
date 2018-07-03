@@ -46,7 +46,7 @@ void Controller::update(void)
         {
             positionController();
         }
-
+        velocitySetpoint[2] = yaw*config.controllerConfig.ratePrescalerYaw;
         velocityController();
         updateMotorControllers();
     }
