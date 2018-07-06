@@ -46,10 +46,17 @@ void ledUpdate(void){
     led4 = 1-led4;
 }
 
+void killMotors(void){
+    controllerInterrupt.detach();
+    data.armMotor = false;
+    controller.update();
+    led=1;
+}
+
 void initialize(void)
 {
     loadConfig();
-    led = 0;
+    //led = 0;
     led2 = 0;
     led3 = 0;
     led4 = 0;
@@ -96,12 +103,14 @@ void initialize(void)
     ledTicker.detach();
     led4 = 0;
     
+    watchdog.attach(&killMotors);
     controller.initialize();
 
     controllerInterrupt.attach(&flight, 1.0/config.flightTickerFrequency);
     gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),1.0/config.gyroTickerFrequency);
     //angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
     watchdog.kick(0.1);
+    wait(1);
 }
 
 int main()

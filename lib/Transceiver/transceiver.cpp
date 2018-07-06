@@ -79,7 +79,7 @@ void Transceiver::interruptHandler(void){
         data.remote.pitch = rxData[2].f;
         data.remote.yaw = rxData[3].f;
         data.armMotor = (bool)((rxBuffer[16] >> 1) & 0x01);
-        data.acroMode = ~(bool)(rxBuffer[16] & 0x01);
+        data.acroMode = 1-(bool)(rxBuffer[16] & 0x01);
         _radio.flushRX();
     }
     

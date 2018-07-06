@@ -13,8 +13,6 @@ FastPWM::FastPWM(PinName pin, int prescaler) : PwmOut(pin) {
 }
 
 FastPWM::~FastPWM( void ) {
-    if (fast_obj != NULL)
-        delete(fast_obj);
 } 
 
 void FastPWM::period(double seconds) {
