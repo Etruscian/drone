@@ -8,11 +8,10 @@
 #include "helpers.hpp"
 
 Watchdog watchdog;
-
 Serial pc(USBTX,USBRX);
 SerialHandler serial;
 DigitalOut led(LED1), led2(LED2), led3(LED3), led4(LED4), radioPower(p30);
-AnalogIn battery(p20);
+AnalogIn battery(p19);
 dataStruct data;
 configStruct config;
 Transceiver radio(p5, p6, p7, p8, p9);
@@ -23,14 +22,6 @@ IMU imu;
 LocalFileSystem local("local");
 
 uint8_t status;
-
-void imuGyroUpdate(void){
-    imu.updateGyro();
-}
-
-void imuAngleUpdate(void){
-    imu.updateAngles();
-}
 
 void batteryLevelUpdate(void){
     data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
@@ -46,39 +37,29 @@ void ledUpdate(void){
     led4 = 1-led4;
 }
 
-void killMotors(void){
-    controllerInterrupt.detach();
-    data.armMotor = false;
-    controller.update();
-    led=1;
-}
-
-void initialize(void)
+int main(void)
 {
+    //Check if watchdog caused reset
+    if ((LPC_WDT->WDMOD >> 2) & 1){
+        data.armMotor = false;
+        controller.update();
+        return;
+    }
+
     loadConfig();
-    //led = 0;
-    led2 = 0;
-    led3 = 0;
-    led4 = 0;
 
     serial.initialize(); 
 
     radioPower=1;
-    wait(1);
+    wait(0.5);
     status = radio.initialize();
-    if (status)
+    while (status)
     {
         radioPower=0;
-        wait(1);
+        wait(0.5);
         radioPower=1;
-        wait(1);
+        wait(0.5);
         status = radio.initialize();
-        if (status)
-        {
-            led = 1;
-            return;
-        }
-        return;
     }
 
     radioInterrupt.fall(callback(&radio, &Transceiver::interruptHandler));
@@ -95,6 +76,7 @@ void initialize(void)
     ledTicker.attach(&ledUpdate, 0.5);
     batteryTicker.attach(&batteryLevelUpdate, 0.1);
 
+    led4=1;
     data.newPacket = false;
     while(!data.newPacket){
         data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
@@ -102,18 +84,11 @@ void initialize(void)
 
     ledTicker.detach();
     led4 = 0;
-    
-    watchdog.attach(&killMotors);
+
     controller.initialize();
 
     controllerInterrupt.attach(&flight, 1.0/config.flightTickerFrequency);
     gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),1.0/config.gyroTickerFrequency);
     //angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
     watchdog.kick(0.1);
-    wait(1);
-}
-
-int main()
-{
-    initialize();
 }

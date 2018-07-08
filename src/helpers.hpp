@@ -10,14 +10,10 @@ extern configStruct config;
 extern LocalFileSystem local;
 
 void loadConfig(void){
-    std::cout << "hi" << std::endl;
-    std::cout << "hi" << std::endl;
     dictionary *dir = iniparser_load("/local/config.ini");
-    std::cout << local.getName() << std::endl;
 
     // Read config for radio
     config.radioConfig.channel = iniparser_getint(dir, "radio:channel",101);
-    std::cout << "hi" << std::endl;
     config.radioConfig.txAddress = iniparser_getlongint(dir, "radio:txaddress",0x007DEADBEE);
     config.radioConfig.rxAddress = iniparser_getlongint(dir, "radio:rxaddress",0x007DEADBEE);
     config.radioConfig.transferSize = iniparser_getint(dir, "radio:transfersize",17);
@@ -34,7 +30,6 @@ void loadConfig(void){
     config.controllerConfig.rateImuPrescalerRoll = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_rollrate_imu",0);
     config.controllerConfig.rateImuPrescalerPitch = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_pitchrate_imu",0);
     config.controllerConfig.rateImuPrescalerYaw = (float)iniparser_getdouble(dir, "ratecontroller:prescaler_yawrate_imu",0);
-
 
     // Read config for controllers
     config.controllerConfig.rateController.KpRoll = (float)iniparser_getdouble(dir, "acromode:kp_roll",0);
@@ -80,7 +75,26 @@ void loadConfig(void){
     config.gyroTickerFrequency = (uint16_t) iniparser_getint(dir, "misc:gyrofrequency",1000);
     config.angleTickerFrequency = (uint16_t) iniparser_getint(dir, "misc:anglefrequency",250);
     iniparser_freedict(dir);
-    std::cout << "hi" << std::endl;
 }
+
+#define WDEN 		(1UL<<0)
+#define WDCOUNT 	(0x0000FFFF)
+#define WDTOF		(0x00000004)
+#define WDRESET	(1UL<<1)
+
+
+ void ConfigureWDT(){
+     NVIC_EnableIRQ(WDT_IRQn);
+     LPC_WDT->WDTC = SystemCoreClock / 16 * 0.1;
+     LPC_WDT->WDMOD = WDEN;
+     LPC_WDT->WDFEED = 0xAA;
+     LPC_WDT->WDFEED = 0x55;
+ }
+
+ void WDT_IRQHandler(void){
+     DigitalOut led(LED4);
+     led = 0;
+     LPC_WDT->WDMOD = WDRESET;
+ }
 
 #endif
