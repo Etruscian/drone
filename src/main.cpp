@@ -53,13 +53,19 @@ int main(void)
     radioPower=1;
     wait(0.5);
     status = radio.initialize();
-    while (status)
+
+    if (status)
     {
-        radioPower=0;
-        wait(0.5);
-        radioPower=1;
-        wait(0.5);
-        status = radio.initialize();
+        ledTicker.attach(&ledUpdate, 0.5);
+        while (status)
+        {
+            radioPower=0;
+            wait(0.5);
+            radioPower=1;
+            wait(0.5);
+            status = radio.initialize();
+        }
+        ledTicker.detach();
     }
 
     radioInterrupt.fall(callback(&radio, &Transceiver::interruptHandler));
@@ -89,6 +95,7 @@ int main(void)
 
     controllerInterrupt.attach(&flight, 1.0/config.flightTickerFrequency);
     gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),1.0/config.gyroTickerFrequency);
-    //angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
+    angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
+
     watchdog.kick(0.1);
 }
