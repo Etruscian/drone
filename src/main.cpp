@@ -43,7 +43,7 @@ int main(void)
     if ((LPC_WDT->WDMOD >> 2) & 1){
         data.armMotor = false;
         controller.update();
-        return;
+        return 0;
     }
 
     loadConfig();
@@ -74,7 +74,7 @@ int main(void)
     if (status)
     {
         led2 = 1;
-        return;
+        return 0;
     }
 
     //imu.calibrate();

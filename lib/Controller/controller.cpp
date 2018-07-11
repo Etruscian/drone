@@ -79,4 +79,5 @@ void Controller::updateMotorControllers(void)
     {
         escController[i].update(throttle * 125.0 + setpoint[i]);
     }
+    escController[0].fire();
 }

@@ -5,6 +5,7 @@
 void FastPWM::initFastPWM( void ) {
     //Set clock source
     LPC_SC->PCLKSEL0|=1<<12;
+    LPC_PWM1->PCR &= 0 << _pwm.pwm;
     bits = 32;
 }
 
@@ -30,5 +31,19 @@ uint32_t FastPWM::setPrescaler(uint32_t reqScale) {
     dynamicPrescaler = false;
     
     return 1;
+}
+
+void FastPWM::enableOneshot(void){
+    LPC_PWM1->MCR &= 0b101 << _pwm.pwm;
+    this->oneshotEnabled = true;
+}
+
+void FastPWM::disableOneshot(void){
+    LPC_PWM1->MCR |= 0b010 << _pwm.pwm;
+}
+
+void FastPWM::fireOneShot(void){
+    if (this->oneshotEnabled)
+        LPC_PWM1->TCR |= 0b1011;
 }
 #endif

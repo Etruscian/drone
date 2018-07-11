@@ -4,7 +4,7 @@ FastPWM::FastPWM(PinName pin, int prescaler) : PwmOut(pin) {
     fast_obj = NULL;
     initFastPWM();
     this->prescaler(prescaler);
-    
+    this->oneshotEnabled = false;
     //Set duty cycle on 0%, period on 20ms
     period(0.02);
     write(0);

@@ -12,6 +12,7 @@ class ESCController{
     ESCController(PinName pin): pwm(pin) {};
     void initialize();
     void update(float);
+    void fire(void);
 
 };
 
