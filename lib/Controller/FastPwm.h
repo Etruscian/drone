@@ -127,12 +127,6 @@ public:
     * @param return - The prescaler which was set (can differ from requested prescaler if not possible)
     */
     int prescaler(int value);
-
-    void enableOneshot(void);
-
-    void disableOneshot(void);
-
-    void fireOneShot(void);
     
 private:
     void initFastPWM(void);

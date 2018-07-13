@@ -33,17 +33,4 @@ uint32_t FastPWM::setPrescaler(uint32_t reqScale) {
     return 1;
 }
 
-void FastPWM::enableOneshot(void){
-    LPC_PWM1->MCR &= 0b101 << _pwm.pwm;
-    this->oneshotEnabled = true;
-}
-
-void FastPWM::disableOneshot(void){
-    LPC_PWM1->MCR |= 0b010 << _pwm.pwm;
-}
-
-void FastPWM::fireOneShot(void){
-    if (this->oneshotEnabled)
-        LPC_PWM1->TCR |= 0b1011;
-}
 #endif
