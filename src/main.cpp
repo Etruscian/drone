@@ -7,7 +7,6 @@
 #include "controller.hpp"
 #include "helpers.hpp"
 
-Watchdog watchdog;
 Serial pc(USBTX,USBRX);
 SerialHandler serial;
 DigitalOut led(LED1), led2(LED2), led3(LED3), led4(LED4), radioPower(p30);
@@ -27,25 +26,12 @@ void batteryLevelUpdate(void){
     data.batteryLevel.f = battery.read()*3.3*(81.6+476)/81.6;
 }
 
-void flight(void)
-{   
-    watchdog.kick();
-    controller.update();
-}
-
 void ledUpdate(void){
     led4 = 1-led4;
 }
 
 int main(void)
 {
-    //Check if watchdog caused reset
-    if ((LPC_WDT->WDMOD >> 2) & 1){
-        data.armMotor = false;
-        controller.update();
-        return 0;
-    }
-
     loadConfig();
 
     serial.initialize(); 
@@ -77,8 +63,6 @@ int main(void)
         return 0;
     }
 
-    //imu.calibrate();
-
     ledTicker.attach(&ledUpdate, 0.5);
     batteryTicker.attach(&batteryLevelUpdate, 0.1);
 
@@ -93,9 +77,7 @@ int main(void)
 
     controller.initialize();
 
-    controllerInterrupt.attach(&flight, 1.0/config.flightTickerFrequency);
+    controllerInterrupt.attach(callback(&controller, &Controller::update), 1.0/config.flightTickerFrequency);
     gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),1.0/config.gyroTickerFrequency);
     angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
-
-    watchdog.kick(0.1);
 }
