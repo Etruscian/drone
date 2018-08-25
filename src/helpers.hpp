@@ -77,24 +77,4 @@ void loadConfig(void){
     iniparser_freedict(dir);
 }
 
-#define WDEN 		(1UL<<0)
-#define WDCOUNT 	(0x0000FFFF)
-#define WDTOF		(0x00000004)
-#define WDRESET	(1UL<<1)
-
-
- void ConfigureWDT(){
-     NVIC_EnableIRQ(WDT_IRQn);
-     LPC_WDT->WDTC = SystemCoreClock / 16 * 0.1;
-     LPC_WDT->WDMOD = WDEN;
-     LPC_WDT->WDFEED = 0xAA;
-     LPC_WDT->WDFEED = 0x55;
- }
-
- void WDT_IRQHandler(void){
-     DigitalOut led(LED4);
-     led = 0;
-     LPC_WDT->WDMOD = WDRESET;
- }
-
 #endif
