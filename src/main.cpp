@@ -1,5 +1,4 @@
 #include <mbed.h>
-#include "Watchdog.hpp"
 #include <config.hpp>
 #include "serialHandler.hpp"
 #include "transceiver.h"
@@ -77,7 +76,7 @@ int main(void)
 
     controller.initialize();
 
-    controllerInterrupt.attach(callback(&controller, &Controller::update), 1.0/config.flightTickerFrequency);
     gyroInterrupt.attach(callback(&imu, &IMU::updateGyro),1.0/config.gyroTickerFrequency);
-    angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
+    controllerInterrupt.attach(callback(&controller, &Controller::update), 1.0/config.flightTickerFrequency);
+    // angleInterrupt.attach(callback(&imu, &IMU::updateAngles),1.0/config.angleTickerFrequency);
 }
